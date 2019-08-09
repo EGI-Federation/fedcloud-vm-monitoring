@@ -5,7 +5,7 @@ The client works with OpenStack cloud providers supporting the OIDC protocol.
 ## Requirements
 * Basic knowledge of the `json`, `os`, `requests`, `datetime` and `ConfigParser` python libraries are requested
 * Python v2.7.12+
-* Cloud providers enabling the "identity:get_user": "" policy
+* Cloud providers enabling the `"identity:get_user": ""` policy
 
 ## Settings 
 For each cloud provider, the following settings have to be provided:
