@@ -58,7 +58,7 @@ offset = 720 # Change here!
     }
 }
 
-[+] Get running instance(s) [#5] from the provider ...
+[+] Get running instance(s) [<b>#5</b>] from the provider ...
 WARNING: User not authorized to perform the requested action: 'identity:get_user'
 
 [ Reporting ] _____________________________________________________________________________________________________________________
@@ -68,9 +68,9 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 192.168.13.37 
 [-] image flavor  = standard.xxlarge with 8 vCPU cores, 32768 of RAM and 80GB of local disk 
 [-] created at    = 2019-07-31T09:05:08Z 
-[-] created by    = 05228772e737467bbd5f5138d362d6a2 
+[-] created by    = <b>05228772e737467bbd5f5138d362d6a2</b> 
 [-] elapsed time  = 218.47 (hours)
-WARNING: User not authorized to perform the requested action: 'identity:get_user'
+<b>WARNING: User not authorized to perform the requested action: 'identity:get_user'</b>
 
 [ Reporting ] _____________________________________________________________________________________________________________________
 [-] instance name = k8s-fat-1 
@@ -79,9 +79,9 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 192.168.13.44 
 [-] image flavor  = standard.xxlarge with 8 vCPU cores, 32768 of RAM and 80GB of local disk 
 [-] created at    = 2019-07-31T08:23:54Z 
-[-] created by    = 05228772e737467bbd5f5138d362d6a2 
+[-] created by    = <b>05228772e737467bbd5f5138d362d6a2</b> 
 [-] elapsed time  = 219.16 (hours)
-WARNING: User not authorized to perform the requested action: 'identity:get_user'
+<b>WARNING: User not authorized to perform the requested action: 'identity:get_user'</b>
 
 [ Reporting ] _____________________________________________________________________________________________________________________
 [-] instance name = k8s-fat-0 
@@ -90,9 +90,9 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 78.128.251.190 
 [-] image flavor  = standard.xxlarge with 8 vCPU cores, 32768 of RAM and 80GB of local disk 
 [-] created at    = 2019-07-31T07:17:58Z 
-[-] created by    = 05228772e737467bbd5f5138d362d6a2 
+[-] created by    = <b>05228772e737467bbd5f5138d362d6a2</b> 
 [-] elapsed time  = 220.26 (hours)
-WARNING: User not authorized to perform the requested action: 'identity:get_user'
+<b>WARNING: User not authorized to perform the requested action: 'identity:get_user'</b>
 
 [ Reporting ] _____________________________________________________________________________________________________________________
 [-] instance name = k8s-master 
@@ -101,9 +101,9 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 192.168.13.58 
 [-] image flavor  = standard.medium with 2 vCPU cores, 4096 of RAM and 80GB of local disk 
 [-] created at    = 2019-07-12T06:20:47Z 
-[-] created by    = 05228772e737467bbd5f5138d362d6a2 
+[-] created by    = <b>05228772e737467bbd5f5138d362d6a2</b> 
 [-] elapsed time  = 677.21 (hours)
-WARNING: User not authorized to perform the requested action: 'identity:get_user'
+<b>WARNING: User not authorized to perform the requested action: 'identity:get_user'</b>
 
 [ Reporting ] _____________________________________________________________________________________________________________________
 [-] instance name = k8s-workers-1 
@@ -112,7 +112,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 78.128.251.232 
 [-] image flavor  = standard.large with 4 vCPU cores, 8192 of RAM and 80GB of local disk 
 [-] created at    = 2019-07-08T12:28:37Z 
-[-] created by    = 05228772e737467bbd5f5138d362d6a2 
+[-] created by    = <b>05228772e737467bbd5f5138d362d6a2</b> 
 [-] elapsed time  = 767.08 (hours)
 
 <b>WARNING: The instance elapsed time exceed the max offset!</b>
@@ -132,7 +132,7 @@ Aborting ...
     }
 }
 
-[+] Get running instance(s) [#1] from the provider ...
+[+] Get running instance(s) [<b>#1</b>] from the provider ...
 WARNING: User not authorized to perform the requested action: 'identity:get_user'
 
 [ Reporting ] _____________________________________________________________________________________________________________________
@@ -142,7 +142,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 193.146.75.141 
 [-] image flavor  = cm4.2xlarge with 8 vCPU cores, 15000 of RAM and 30GB of local disk 
 [-] created at    = 2019-08-01T14:03:57Z 
-[-] created by    = 15bbc31fbe034adf9dbb2c1d8ebe0e05 
+[-] created by    = <b>15bbc31fbe034adf9dbb2c1d8ebe0e05</b> 
 [-] elapsed time  = 189.50 (hours)
 
 [.] Reading the configuration settings of the cloud provider: INFN-CATANIA-STACK 
@@ -157,7 +157,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
     }
 }
 
-[+] Get running instance(s) [#7] from the provider ...
+[+] Get running instance(s) [<b>#7</b>] from the provider ...
 
 [ Reporting ] _____________________________________________________________________________________________________________________
 [-] instance name = im_userimage 
@@ -166,7 +166,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 212.189.145.37 
 [-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
 [-] created at    = 2019-07-31T17:10:53Z 
-[-] created by    = /C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca 
+[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
 [-] elapsed time  = 210.38 (hours)
 
 [ Reporting ] _____________________________________________________________________________________________________________________
@@ -176,7 +176,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 212.189.145.34 
 [-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
 [-] created at    = 2019-07-31T17:10:22Z 
-[-] created by    = /C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca 
+[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
 [-] elapsed time  = 210.40 (hours)
 
 [ Reporting ] _____________________________________________________________________________________________________________________
@@ -186,7 +186,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 212.189.145.31 
 [-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
 [-] created at    = 2019-07-31T17:10:10Z 
-[-] created by    = /C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca 
+[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
 [-] elapsed time  = 210.40 (hours)
 
 [ Reporting ] _____________________________________________________________________________________________________________________
@@ -196,7 +196,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 212.189.145.30 
 [-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
 [-] created at    = 2019-07-31T17:10:02Z 
-[-] created by    = /C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca 
+[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
 [-] elapsed time  = 210.41 (hours)
 
 [ Reporting ] _____________________________________________________________________________________________________________________
@@ -206,7 +206,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 212.189.145.176 
 [-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
 [-] created at    = 2019-07-31T17:09:54Z 
-[-] created by    = /C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca 
+[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
 [-] elapsed time  = 210.42 (hours)
 
 [ Reporting ] _____________________________________________________________________________________________________________________
@@ -216,7 +216,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 212.189.145.169 
 [-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
 [-] created at    = 2019-07-31T16:53:39Z 
-[-] created by    = /C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca 
+[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
 [-] elapsed time  = 210.69 (hours)
 
 [ Reporting ] _____________________________________________________________________________________________________________________
@@ -226,7 +226,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] ip address    = 212.189.145.36 
 [-] image flavor  = m1.large with 4 vCPU cores, 8192 of RAM and 80GB of local disk 
 [-] created at    = 2018-02-12T08:56:38Z 
-[-] created by    = egi 
+[-] created by    = <b>egi</b> 
 [-] elapsed time  = 13034.64 (hours)
 
 <b>WARNING: The instance elapsed time exceed the max offset!</b>
@@ -235,6 +235,9 @@ Do you want to remove the running VM (y/n) ? n
 Aborting ...
 
 </pre>
+
+## Links
+https://docs.openstack.org/api-ref/
 
 
 # Template for EGI repositories.
