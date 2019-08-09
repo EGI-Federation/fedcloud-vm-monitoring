@@ -115,7 +115,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] created by    = 05228772e737467bbd5f5138d362d6a2 
 [-] elapsed time  = 767.08 (hours)
 
-WARNING: The instance elapsed time exceed the max offset!
+`WARNING: The instance elapsed time exceed the max offset!`
 [-] Deleting of the instance [4c807302-1d74-49cb-849a-f7559d126133] in progress ...
 Do you want to remove the running VM (y/n) ? n
 Aborting ...
@@ -229,7 +229,7 @@ WARNING: User not authorized to perform the requested action: 'identity:get_user
 [-] created by    = egi 
 [-] elapsed time  = 13034.64 (hours)
 
-WARNING: The instance elapsed time exceed the max offset!
+<b>WARNING: The instance elapsed time exceed the max offset!</b>
 [-] Deleting of the instance [93211ce7-1dd0-4b71-8ce4-780e5f97ce0c] in progress ...
 Do you want to remove the running VM (y/n) ? n
 Aborting ...
