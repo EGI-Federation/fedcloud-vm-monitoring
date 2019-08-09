@@ -25,18 +25,18 @@ Save these settings in the `providers-settings.ini` configuration file.
 
 For simple one-off requests, use this library as a drop-in replacement for the requests library:
 
-# This configuration file contains the settings of EFI cloud providers to be checked.
+#This configuration file contains the settings of EFI cloud providers to be checked.
 training_settings = "providers-settings.ini"
 
-# These are the EGI AAI Check-In settings used to generate a valid access token
-# DO NOT CHANGE THE SETTINGS BELOW!
+#These are the EGI AAI Check-In settings used to generate a valid access token
+#DO NOT CHANGE THE SETTINGS BELOW!
 client_id = "f33e824a-078d-497b-b700-25b0df7fc5b7"
 client_secret = "B80vPK0LVbYuvwRj0Aexs8y0rKgk5XHwYRRq3BCr33ejj33385bzDVcPmSTUkqA2QjMiwWKJDTxvOou7yVV8EA"
 refresh_token = "eyJhbGciOiJub25lIn0.eyJleHAiOjE1ODQyNzQxNDYsImp0aSI6IjkzNGMxNTBhLTA4NDQtNDI5ZC05NDJhLTIwMzIxMDgzNzIzMSJ9."
 checkin_auth_url = "https://aai.egi.eu/oidc/token"
 
-# Set the max elapsed time (in hours) for a running instance in the EGI FedCloud infrastructure
-# Considering as offset 1 mounth = 30 days * 24h = 720 hours
+#Set the max elapsed time (in hours) for a running instance in the EGI FedCloud infrastructure
+#Considering as offset 1 mounth = 30 days * 24h = 720 hours
 offset = 720 # Change here!
 
 ## Listing long-running instances
