@@ -239,7 +239,7 @@ Aborting ...
 ## Links
 https://docs.openstack.org/api-ref/
 
-
+<!==
 # Template for EGI repositories.
 
 It includes:
@@ -254,3 +254,4 @@ Content is based on:
 * [Contributor Covenant](http://contributor-covenant.org)
 * [Semantic Versioning](https://semver.org/)
 * [Chef Cookbook Contributing Guide](https://github.com/chef-cookbooks/community_cookbook_documentation/blob/master/CONTRIBUTING.MD)
+==>
