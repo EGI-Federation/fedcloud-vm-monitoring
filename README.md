@@ -25,7 +25,7 @@ Save these settings in the `providers-settings.ini` configuration file.
 
 For simple one-off requests, use this library as a drop-in replacement for the requests library:
 
-#This configuration file contains the settings of EFI cloud providers to be checked.
+# This configuration file contains the settings of EFI cloud providers to be checked.
 training_settings = "providers-settings.ini"
 
 #These are the EGI AAI Check-In settings used to generate a valid access token
