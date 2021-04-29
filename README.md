@@ -20,7 +20,7 @@ Edit and export the settings:
 * `CHECKIN_REFRESH_TOKEN`
 
 <pre>
-cat openrc.sh
+]$ cat openrc.sh
 
 #!/bin/bash
 
@@ -44,6 +44,7 @@ export CHECKIN_AUTH_URL="https://aai.egi.eu/oidc/token"
 
 Create a list of cloud providers to be monitored with the
 `providers-settings.py` python client.
+
 This list is generated harvesting the indentity endpoints
 of the cloud providers in production status from the EGI GOCDB service.
 
@@ -65,11 +66,13 @@ ProjectID: PROJECT_ID
 For simple one-off requests, use this library as a drop-in replacement
 for the requests library:
 
-<b># This configuration file contains the EGI cloud providers settings.</b>
+<pre>
+# This configuration file contains the EGI cloud providers settings.
 PROVIDERS_SETTINGS_FILENAME = "providers-settings.ini"
 
-<b># The tenant name to be monitored in the cloud providers.</b>
+# The tenant name to be monitored in the cloud providers.
 TENANT_NAME = "access"
+</pre>
 
 <pre>
 ]$ python providers-settings.py
@@ -89,71 +92,7 @@ Fetching the providers endpoints from the EGI GOCDB
 (True, u'EGI_access')
 - Project tenant published by the provider.
 (True, u'EGI_FCTF')
-- No.1 project(s) supported by the provider: CETA-GRID
-(True, u'fedcloud.egi.eu')
-- No.3 project(s) supported by the provider: UA-BITP
-(True, u'WeNMR')
-(True, u'sysbio')
-(True, u'fedcloud.egi.eu')
-- No.4 project(s) supported by the provider: IISAS-GPUCloud
-(True, u'fedcloud.egi.eu')
-(True, u'training.egi.eu')
-(True, u'acc-comp.egi.eu')
-(True, u'enmr.eu')
-- No.3 project(s) supported by the provider: IISAS-FedCloud
-(True, u'training.egi.eu')
-(True, u'fedcloud.egi.eu')
-(True, u'vo.nextgeoss.eu')
-- No.3 project(s) supported by the provider: UNIV-LILLE
-(True, u'vo_fusion')
-(True, u'vo_fedcloud_egi_eu')
-(True, u'vo_access_egi_eu')
-- Project tenant published by the provider.
-- No.2 project(s) supported by the provider: CYFRONET-CLOUD
-(True, u'fedcloud.egi.eu')
-(True, u'vo.access.egi.eu')
-- Project tenant published by the provider.
-- No.7 project(s) supported by the provider: CESNET-MCC
-(True, u'vo.nextgeoss.eu')
-(True, u'fusion')
-(True, u'vo.clarin.eu')
-(True, u'enmr.eu')
-(True, u'panosc.eu')
-(True, u'training.egi.eu')
-(True, u'biomed')
-- No.7 project(s) supported by the provider: CESGA
-(True, u'fusion')
-(True, u'vo.access.egi.eu')
-- Project tenant published by the provider.
-(True, u'enmr.eu')
-(True, u'blazarmonitoring.asi.it')
-(True, u'vo.emso-eric.eu')
-(True, u'vo.nextgeoss.eu')
-(True, u'vo.clarin.eu')
-- No.2 project(s) supported by the provider: 100IT
-(True, u'EGI_digitbrain')
-(True, u'EGI_fedcloud.egi.eu')
-- No.2 project(s) supported by the provider: NCG-INGRID-PT
-(True, u'egi')
-(True, u'tutorial')
-- No.2 project(s) supported by the provider: fedcloud.srce.hr
-(True, u'fedcloud-egi-eu')
-(True, u'fedcloud-tf')
-- No.1 project(s) supported by the provider: Kharkov-KIPT-LCG2
-(True, u'fedcloud.egi.eu')
-- No.1 project(s) supported by the provider: BIFI
-(True, u'gosafe.eng.it')
-- No.1 project(s) supported by the provider: IISAS-FedCloud
-(True, u'fedcloud.egi.eu')
-- No.5 project(s) supported by the provider: TR-FC1-ULAKBIM
-(True, u'fusion')
-(True, u'enmr.eu')
-(True, u'vo.access.egi.eu')
-- Project tenant published by the provider.
-(True, u'eiscat.se')
-(True, u'fedcloud.egi.eu')
-- No.1 project(s) supported by the provider: UPV-GRyCAP
-(True, u'fedcloud.egi.eu')
+[..]
 Saving providers settings [DONE]
 </pre>
 
@@ -219,4 +158,5 @@ _____________________________________________________________
 ## Links
 
 https://docs.openstack.org/api-ref/
+
 https://docs.openstack.org/keystone/pike/api_curl_examples.html
