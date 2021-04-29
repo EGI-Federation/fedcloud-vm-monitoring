@@ -1,27 +1,28 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import requests
 import json
 import os
 from urlparse import urlparse, urlunparse, urljoin
+#from urllib.parse import urlparse, urlunparse, urljoin
 
 def get_OIDC_Token(checkin_auth_url, client_id, client_secret, refresh_token):
-        ''' Get an OIDC token from the EGI AAI Check-In service'''
+    ''' Get an OIDC token from the EGI AAI Check-In service'''
 
-  	# Creating the paylod for the request
-	payload = {'client_id': client_id, 
-                   'client_secret': client_secret,
-		   'grant_type': 'refresh_token',
-                   'refresh_token': refresh_token,
-		   'scope': 'openid email profile'}
+    # Creating the paylod for the request
+    payload = {'client_id': client_id, 
+               'client_secret': client_secret,
+               'grant_type': 'refresh_token',
+               'refresh_token': refresh_token,
+               'scope': 'openid email profile'}
 
-        curl = requests.post(url=checkin_auth_url, 
-                             auth=(client_id, client_secret), 
-                             data=payload)
-        data = curl.json()
+    curl = requests.post(url=checkin_auth_url, 
+                         auth=(client_id, client_secret), 
+                         data=payload)
+    data = curl.json()
 
-        # Server response
-	return (data["access_token"])
+    # Server response
+    return (data["access_token"])
 
 
 def get_unscoped_Token(os_auth_url, access_token):
@@ -29,8 +30,10 @@ def get_unscoped_Token(os_auth_url, access_token):
 
     url = get_keystone_url(os_auth_url,
         "/v3/OS-FEDERATION/identity_providers/egi.eu/protocols/openid/auth")
-	
-    curl = requests.post(url, headers={'Authorization': 'Bearer %s' % access_token})
+    
+    curl = requests.post(url, 
+           headers={'Authorization': 'Bearer %s' % access_token})
+
     return curl.headers['X-Subject-Token']
 
 
@@ -63,7 +66,7 @@ def get_scoped_Token(os_auth_url, os_project_id, unscoped_token):
     }
     
     r = requests.post(url, 
-		      headers={'content-type': 'application/json'},
+              headers={'content-type': 'application/json'},
                       data=json.dumps(token_body))
 
     return r.headers['X-Subject-Token']

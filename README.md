@@ -1,241 +1,222 @@
 # fedcloud-vm-monitoring
-This repository contains the Python client to monitor the EGI FedCloud infrastructure resources allocation and removing long-running instances.
-The client works with OpenStack cloud providers supporting the OIDC protocol.
+
+This repository contains the Python clients to monitor the EGI FedCloud resources
+allocation and removing long-running instances.
+The clients work with OpenStack cloud providers supporting the OIDC protocol.
 
 ## Requirements
-* Basic knowledge of the `json`, `os`, `requests`, `datetime` and `ConfigParser` python libraries are requested
+
+* Basic knowledge of the `json`, `requests`, `ConfigParser` and other basic python
+  libraries are requested
 * Python v2.7.12+
 * Cloud providers enabling the `"identity:get_user": ""` policy
 
-## Settings 
-For each cloud provider, the following settings have to be provided:
+## Configure the environment
+
+Edit and export the settings:
+
+* `CHECKIN_CLIENT_ID`,
+* `CHECKIN_CLIENT_SECRET`, and
+* `CHECKIN_REFRESH_TOKEN`
+
+<pre>
+cat openrc.sh
+
+#!/bin/bash
+
+# General settings
+export OS_PROTOCOL="openid"
+export OS_IDENTITY_API_VERSION=3
+export OS_IDENTITY_PROVIDER="egi.eu"
+export OS_AUTH_TYPE="v3oidcaccesstoken"
+
+# EGI AAI Check-In settings
+export CHECKIN_CLIENT_ID="..."
+export CHECKIN_CLIENT_SECRET="..."
+export CHECKIN_REFRESH_TOKEN="..."
+export CHECKIN_AUTH_URL="https://aai.egi.eu/oidc/token"
+
+# Sourcing the env. variables
+]$ . openrc.sh
+</pre>
+
+## Configure the providers setting
+
+Create a list of cloud providers to be monitored with the
+`providers-settings.py` python client.
+This list is generated harvesting the indentity endpoints
+of the cloud providers in production status from the EGI GOCDB service.
+
+For each cloud provider, the following settings are provided:
 
 <pre>
 [PROVIDER HOSTNAME]
+ROC_Name: ROC_NAME 
 Name: PROVIDER HOSTNAME
 Country: COUNTRY OF THE PROVIDER
-Identity: KEYSTONE URL
-Compute: NOVA URL
+Identity: KEYSTONE_URL
+Compute: NOVA_URL
+GOC Portal URL: ENTRY IN THE EGI GOCDB
 ProjectID: PROJECT_ID 
 </pre>
 
-Save these settings in the `providers-settings.ini` configuration file.
-
 ## Usage
 
-For simple one-off requests, use this library as a drop-in replacement for the requests library:
+For simple one-off requests, use this library as a drop-in replacement
+for the requests library:
+
+<b># This configuration file contains the EGI cloud providers settings.</b>
+PROVIDERS_SETTINGS_FILENAME = "providers-settings.ini"
+
+<b># The tenant name to be monitored in the cloud providers.</b>
+TENANT_NAME = "access"
 
 <pre>
-<b># This configuration file contains the settings of EFI cloud providers to be checked.</b>
-training_settings = "providers-settings.ini"
+]$ python providers-settings.py
 
-<b># These are the EGI AAI Check-In settings used to generate a valid access token
-# DO NOT CHANGE THE SETTINGS BELOW!</b>
-client_id = "f33e824a-078d-497b-b700-25b0df7fc5b7"
-client_secret = "B80vPK0LVbYuvwRj0Aexs8y0rKgk5XHwYRRq3BCr33ejj33385bzDVcPmSTUkqA2QjMiwWKJDTxvOou7yVV8EA"
-refresh_token = "eyJhbGciOiJub25lIn0.eyJleHAiOjE1ODQyNzQxNDYsImp0aSI6IjkzNGMxNTBhLTA4NDQtNDI5ZC05NDJhLTIwMzIxMDgzNzIzMSJ9."
-checkin_auth_url = "https://aai.egi.eu/oidc/token"
-
-<b># Set the max elapsed time (in hours) for a running instance in the EGI FedCloud infrastructure
-# Considering as offset 1 mounth = 30 days * 24h = 720 hours</b>
-offset = 720 # Change here!
+Configuring providers settings in progress...
+This operation may take time. Please wait!
+Fetching the providers endpoints from the EGI GOCDB
+- No.5 project(s) supported by the provider: IFCA-LCG2
+(True, u'VO:vo.nextgeoss.eu')
+(False, u'VO:vo.mrilab.es')
+(True, u'VO:vo.access.egi.eu')
+- Project tenant published by the provider.
+(True, u'VO:enmr.eu')
+(True, u'VO:training.egi.eu')
+- No.3 project(s) supported by the provider: IN2P3-IRES
+(True, u'EGI_biomed')
+(True, u'EGI_access')
+- Project tenant published by the provider.
+(True, u'EGI_FCTF')
+- No.1 project(s) supported by the provider: CETA-GRID
+(True, u'fedcloud.egi.eu')
+- No.3 project(s) supported by the provider: UA-BITP
+(True, u'WeNMR')
+(True, u'sysbio')
+(True, u'fedcloud.egi.eu')
+- No.4 project(s) supported by the provider: IISAS-GPUCloud
+(True, u'fedcloud.egi.eu')
+(True, u'training.egi.eu')
+(True, u'acc-comp.egi.eu')
+(True, u'enmr.eu')
+- No.3 project(s) supported by the provider: IISAS-FedCloud
+(True, u'training.egi.eu')
+(True, u'fedcloud.egi.eu')
+(True, u'vo.nextgeoss.eu')
+- No.3 project(s) supported by the provider: UNIV-LILLE
+(True, u'vo_fusion')
+(True, u'vo_fedcloud_egi_eu')
+(True, u'vo_access_egi_eu')
+- Project tenant published by the provider.
+- No.2 project(s) supported by the provider: CYFRONET-CLOUD
+(True, u'fedcloud.egi.eu')
+(True, u'vo.access.egi.eu')
+- Project tenant published by the provider.
+- No.7 project(s) supported by the provider: CESNET-MCC
+(True, u'vo.nextgeoss.eu')
+(True, u'fusion')
+(True, u'vo.clarin.eu')
+(True, u'enmr.eu')
+(True, u'panosc.eu')
+(True, u'training.egi.eu')
+(True, u'biomed')
+- No.7 project(s) supported by the provider: CESGA
+(True, u'fusion')
+(True, u'vo.access.egi.eu')
+- Project tenant published by the provider.
+(True, u'enmr.eu')
+(True, u'blazarmonitoring.asi.it')
+(True, u'vo.emso-eric.eu')
+(True, u'vo.nextgeoss.eu')
+(True, u'vo.clarin.eu')
+- No.2 project(s) supported by the provider: 100IT
+(True, u'EGI_digitbrain')
+(True, u'EGI_fedcloud.egi.eu')
+- No.2 project(s) supported by the provider: NCG-INGRID-PT
+(True, u'egi')
+(True, u'tutorial')
+- No.2 project(s) supported by the provider: fedcloud.srce.hr
+(True, u'fedcloud-egi-eu')
+(True, u'fedcloud-tf')
+- No.1 project(s) supported by the provider: Kharkov-KIPT-LCG2
+(True, u'fedcloud.egi.eu')
+- No.1 project(s) supported by the provider: BIFI
+(True, u'gosafe.eng.it')
+- No.1 project(s) supported by the provider: IISAS-FedCloud
+(True, u'fedcloud.egi.eu')
+- No.5 project(s) supported by the provider: TR-FC1-ULAKBIM
+(True, u'fusion')
+(True, u'enmr.eu')
+(True, u'vo.access.egi.eu')
+- Project tenant published by the provider.
+(True, u'eiscat.se')
+(True, u'fedcloud.egi.eu')
+- No.1 project(s) supported by the provider: UPV-GRyCAP
+(True, u'fedcloud.egi.eu')
+Saving providers settings [DONE]
 </pre>
 
-## Listing long-running instances
+The providers settings supporting the `access` tenant is stored in
+the `PROVIDERS_SETTINGS_FILENAME` file:
+
+<pre>
+]$ cat providers-settings.ini
+
+# Settings of the EGI FedCloud providers
+# Last update: 29/04/2021 16:36:19
+#
+
+[IFCA-LCG2]
+ROC_Name: NGI_IBERGRID
+Name: IFCA-LCG2
+Country: Spain
+Identity: https://api.cloud.ifca.es:5000/v3/
+Compute: https://api.cloud.ifca.es:8774/v2.1
+GOC Portal URL: https://goc.egi.eu/portal/index.php?Page_Type=Service&id=7513
+# VO:vo.access.egi.eu
+ProjectID: 999f045cb1ff4684a15ebb338af69460
+
+[..]
+</pre>
+
+## Checking long-running VM instances running in the EGI Federation
 
 <pre>
 ]$ python fedcloud-vm-monitoring.py 
 
-[.] Reading the configuration settings of the cloud provider: CESNET-MCC 
-
+[.] Reading settings of the provider: IFCA-LCG2 
 {
     "provider": {
-        "country": "Czech Republic", 
-        "project_id": "eae2aa7f26334104906106bca4b82ae3", 
-        "compute": "https://compute.cloud.muni.cz/v2.1", 
-        "name": "CESNET-MCC", 
-        "identity": "https://identity.cloud.muni.cz/v3"
-    }
-}
-
-[+] Get running instance(s) [<b>#5</b>] from the provider ...
-WARNING: User not authorized to perform the requested action: 'identity:get_user'
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = k8s-fat-2 
-[-] instance_id   = http://compute.cloud.muni.cz/v2.1/eae2aa7f26334104906106bca4b82ae3/servers/5b239153-ded7-4db9-8283-02bb1ead5935 
-[-] status        = ACTIVE 
-[-] ip address    = 192.168.13.37 
-[-] image flavor  = standard.xxlarge with 8 vCPU cores, 32768 of RAM and 80GB of local disk 
-[-] created at    = 2019-07-31T09:05:08Z 
-[-] created by    = <b>05228772e737467bbd5f5138d362d6a2</b> 
-[-] elapsed time  = 218.47 (hours)
-<b>WARNING: User not authorized to perform the requested action: 'identity:get_user'</b>
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = k8s-fat-1 
-[-] instance_id   = http://compute.cloud.muni.cz/v2.1/eae2aa7f26334104906106bca4b82ae3/servers/6f7aef51-2823-4b1e-9d80-fcde1b60964a 
-[-] status        = ACTIVE 
-[-] ip address    = 192.168.13.44 
-[-] image flavor  = standard.xxlarge with 8 vCPU cores, 32768 of RAM and 80GB of local disk 
-[-] created at    = 2019-07-31T08:23:54Z 
-[-] created by    = <b>05228772e737467bbd5f5138d362d6a2</b> 
-[-] elapsed time  = 219.16 (hours)
-<b>WARNING: User not authorized to perform the requested action: 'identity:get_user'</b>
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = k8s-fat-0 
-[-] instance_id   = http://compute.cloud.muni.cz/v2.1/eae2aa7f26334104906106bca4b82ae3/servers/9cf4b36c-0abb-483f-9e02-fadd38e87f8c 
-[-] status        = ACTIVE 
-[-] ip address    = 78.128.251.190 
-[-] image flavor  = standard.xxlarge with 8 vCPU cores, 32768 of RAM and 80GB of local disk 
-[-] created at    = 2019-07-31T07:17:58Z 
-[-] created by    = <b>05228772e737467bbd5f5138d362d6a2</b> 
-[-] elapsed time  = 220.26 (hours)
-<b>WARNING: User not authorized to perform the requested action: 'identity:get_user'</b>
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = k8s-master 
-[-] instance_id   = http://compute.cloud.muni.cz/v2.1/eae2aa7f26334104906106bca4b82ae3/servers/cf125cc2-22a3-4a94-9989-876ab32a5354 
-[-] status        = ACTIVE 
-[-] ip address    = 192.168.13.58 
-[-] image flavor  = standard.medium with 2 vCPU cores, 4096 of RAM and 80GB of local disk 
-[-] created at    = 2019-07-12T06:20:47Z 
-[-] created by    = <b>05228772e737467bbd5f5138d362d6a2</b> 
-[-] elapsed time  = 677.21 (hours)
-<b>WARNING: User not authorized to perform the requested action: 'identity:get_user'</b>
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = k8s-workers-1 
-[-] instance_id   = http://compute.cloud.muni.cz/v2.1/eae2aa7f26334104906106bca4b82ae3/servers/4c807302-1d74-49cb-849a-f7559d126133 
-[-] status        = ACTIVE 
-[-] ip address    = 78.128.251.232 
-[-] image flavor  = standard.large with 4 vCPU cores, 8192 of RAM and 80GB of local disk 
-[-] created at    = 2019-07-08T12:28:37Z 
-[-] created by    = <b>05228772e737467bbd5f5138d362d6a2</b> 
-[-] elapsed time  = 767.08 (hours)
-
-<b>WARNING: The instance elapsed time exceed the max offset!</b>
-[-] Deleting of the instance [4c807302-1d74-49cb-849a-f7559d126133] in progress ...
-Do you want to remove the running VM (y/n) ? n
-Aborting ...
-
-[.] Reading the configuration settings of the cloud provider: IFCA-LCG2 
-
-{
-    "provider": {
-        "country": "Spain", 
-        "project_id": "f1d0308880134d04964097524eace710", 
         "compute": "https://api.cloud.ifca.es:8774/v2.1", 
         "name": "IFCA-LCG2", 
-        "identity": "https://api.cloud.ifca.es:5000/v3"
+        "country": "Spain", 
+        "ROC_name": "NGI_IBERGRID", 
+        "project_id": "999f045cb1ff4684a15ebb338af69460", 
+        "identity": "https://api.cloud.ifca.es:5000/v3/"
     }
 }
 
-[+] Get running instance(s) [<b>#1</b>] from the provider ...
-WARNING: User not authorized to perform the requested action: 'identity:get_user'
+[+] Total VM instance(s) running in the provider = [#1]
+_____________________________________________________________
+- instance name = EGI_CentOS_8-161470352152 
+- instance_id   = https://api.cloud.ifca.es:8774/v2.1/999f045cb1ff4684a15ebb338af69460/servers/966d49a2-81ac-4301-9d92-d68c7dfbc75a 
+- status        = ACTIVE 
+- ip address    = 193.146.75.230 
+- image flavor  = cm4.2xlarge with 8 vCPU cores, 15000 of RAM and 30GB of local disk 
+- created at    = 2021-03-02T16:45:28Z 
+- elapsed time  = 1389.98 (hours)
+  WARNING   = User not authorized to perform the requested action: 'identity:get_user'
+- created by    = 5bd063142ec146a1ba93b794eaded9d2 
 
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = onedata 
-[-] instance_id   = https://api.cloud.ifca.es:8774/v2.1/f1d0308880134d04964097524eace710/servers/d44c38d9-d8f8-43fc-9f05-ccf31e004171 
-[-] status        = ACTIVE 
-[-] ip address    = 193.146.75.141 
-[-] image flavor  = cm4.2xlarge with 8 vCPU cores, 15000 of RAM and 30GB of local disk 
-[-] created at    = 2019-08-01T14:03:57Z 
-[-] created by    = <b>15bbc31fbe034adf9dbb2c1d8ebe0e05</b> 
-[-] elapsed time  = 189.50 (hours)
-
-[.] Reading the configuration settings of the cloud provider: INFN-CATANIA-STACK 
-
-{
-    "provider": {
-        "country": "Italy", 
-        "project_id": "00982464978c4b61a5f570e315251f02", 
-        "compute": "http://stack-server.ct.infn.it:8774/v2.1", 
-        "name": "INFN-CATANIA-STACK", 
-        "identity": "https://stack-server.ct.infn.it:5000/v3"
-    }
-}
-
-[+] Get running instance(s) [<b>#7</b>] from the provider ...
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = im_userimage 
-[-] instance_id   = http://stack-server.ct.infn.it:8774/v2.1/00982464978c4b61a5f570e315251f02/servers/7f6891ac-f695-443d-8bed-90dcc6592952 
-[-] status        = ACTIVE 
-[-] ip address    = 212.189.145.37 
-[-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
-[-] created at    = 2019-07-31T17:10:53Z 
-[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
-[-] elapsed time  = 210.38 (hours)
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = im_userimage 
-[-] instance_id   = http://stack-server.ct.infn.it:8774/v2.1/00982464978c4b61a5f570e315251f02/servers/4b2ac454-cfa9-4734-9cd0-7a12cd1c24b6 
-[-] status        = ACTIVE 
-[-] ip address    = 212.189.145.34 
-[-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
-[-] created at    = 2019-07-31T17:10:22Z 
-[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
-[-] elapsed time  = 210.40 (hours)
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = im_userimage 
-[-] instance_id   = http://stack-server.ct.infn.it:8774/v2.1/00982464978c4b61a5f570e315251f02/servers/723e4c9b-4bf0-4fa0-a976-dc76f01938e2 
-[-] status        = ACTIVE 
-[-] ip address    = 212.189.145.31 
-[-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
-[-] created at    = 2019-07-31T17:10:10Z 
-[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
-[-] elapsed time  = 210.40 (hours)
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = im_userimage 
-[-] instance_id   = http://stack-server.ct.infn.it:8774/v2.1/00982464978c4b61a5f570e315251f02/servers/2a0cddf2-b06b-4d1a-837d-2106602740e6 
-[-] status        = ACTIVE 
-[-] ip address    = 212.189.145.30 
-[-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
-[-] created at    = 2019-07-31T17:10:02Z 
-[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
-[-] elapsed time  = 210.41 (hours)
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = im_userimage 
-[-] instance_id   = http://stack-server.ct.infn.it:8774/v2.1/00982464978c4b61a5f570e315251f02/servers/dc76df85-e459-4c3d-ab20-b502c86d008a 
-[-] status        = ACTIVE 
-[-] ip address    = 212.189.145.176 
-[-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
-[-] created at    = 2019-07-31T17:09:54Z 
-[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
-[-] elapsed time  = 210.42 (hours)
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = im_userimage 
-[-] instance_id   = http://stack-server.ct.infn.it:8774/v2.1/00982464978c4b61a5f570e315251f02/servers/d050e570-8d69-4387-bc5b-4feee754fc1f 
-[-] status        = ACTIVE 
-[-] ip address    = 212.189.145.169 
-[-] image flavor  = m1.medium with 2 vCPU cores, 4096 of RAM and 40GB of local disk 
-[-] created at    = 2019-07-31T16:53:39Z 
-[-] created by    = <b>/C=IT/O=INFN/OU=Personal Certificate/L=Catania/CN=Giuseppe La Rocca</b> 
-[-] elapsed time  = 210.69 (hours)
-
-[ Reporting ] _____________________________________________________________________________________________________________________
-[-] instance name = EGI_FedCloudClient 
-[-] instance_id   = http://stack-server.ct.infn.it:8774/v2.1/00982464978c4b61a5f570e315251f02/servers/93211ce7-1dd0-4b71-8ce4-780e5f97ce0c 
-[-] status        = ACTIVE 
-[-] ip address    = 212.189.145.36 
-[-] image flavor  = m1.large with 4 vCPU cores, 8192 of RAM and 80GB of local disk 
-[-] created at    = 2018-02-12T08:56:38Z 
-[-] created by    = <b>egi</b> 
-[-] elapsed time  = 13034.64 (hours)
-
-<b>WARNING: The instance elapsed time exceed the max offset!</b>
-[-] Deleting of the instance [93211ce7-1dd0-4b71-8ce4-780e5f97ce0c] in progress ...
-Do you want to remove the running VM (y/n) ? n
-Aborting ...
+[-] <b>WARNING: The VM instance elapsed time exceed the max offset!
+[-]    Deleting of the instance [966d49a2-81ac-4301-9d92-d68c7dfbc75a] in progress ...
+       Do you want to remove the running VM (y/n) ? y</b>
+[..]
 
 </pre>
 
 ## Links
-https://docs.openstack.org/api-ref/
 
+https://docs.openstack.org/api-ref/
+https://docs.openstack.org/keystone/pike/api_curl_examples.html
