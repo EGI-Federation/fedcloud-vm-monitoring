@@ -157,6 +157,5 @@ _____________________________________________________________
 
 ## Links
 
-https://docs.openstack.org/api-ref/
-
-https://docs.openstack.org/keystone/pike/api_curl_examples.html
+* https://docs.openstack.org/api-ref/
+* https://docs.openstack.org/keystone/pike/api_curl_examples.html
