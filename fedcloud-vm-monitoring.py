@@ -139,14 +139,6 @@ def main():
 
     # Get the user's credentials
     creds = get_credentials()
-    # print("os_protocol = %s " % creds['os_protocol'])
-    # print("os_identity_api_version = %s " % creds['os_identity_api_version'])
-    # print("os_identity_provider = %s " % creds['os_identity_provider'])
-    # print("os_auth_type = %s " % creds['os_auth_type'])
-    # print("checkin_client_id = %s " % creds['checkin_client_id'])
-    # print("checkin_client_secret = %s " % creds['checkin_client_secret'])
-    # print("checkin_refresh_token = %s " % creds['checkin_refresh_token'])
-    # print("checkin_auth_url = %s " % creds['checkin_auth_url'])
 
     # Initialize the OIDC token from the EGI AAI Check-In service.
     token = get_OIDC_Token(

@@ -15,7 +15,8 @@
 #  limitations under the License.
 #
 
-import ConfigParser
+# import ConfigParser
+import configparser
 import os
 
 __author__ = "Giuseppe LA ROCCA"
@@ -78,7 +79,8 @@ def load_provider_settings(file):
     providers = []
 
     # Reading configuration file
-    config = ConfigParser.ConfigParser()
+    # config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read(filename)
 
     for section in config.sections():
