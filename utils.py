@@ -21,8 +21,8 @@ import os
 
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.1"
-__date__ = "$Date: 27/04/2021 18:40:27"
+__version__ = "$Revision: 1.0.2"
+__date__ = "$Date: 14/05/2021 18:40:27"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 
@@ -103,19 +103,29 @@ def load_provider_settings(file):
     return providers
 
 
-def get_credentials():
-    """ Reading settings from env """
+def get_settings():
+    """ Reading profile settings from env """
 
     d = {}
-    d["os_protocol"] = os.environ["OS_PROTOCOL"]
-    d["os_identity_api_version"] = os.environ["OS_IDENTITY_API_VERSION"]
-    d["os_identity_provider"] = os.environ["OS_IDENTITY_PROVIDER"]
-    d["os_auth_type"] = os.environ["OS_AUTH_TYPE"]
+    try:
+        d["os_protocol"] = os.environ["OS_PROTOCOL"]
+        d["os_identity_api_version"] = os.environ["OS_IDENTITY_API_VERSION"]
+        d["os_identity_provider"] = os.environ["OS_IDENTITY_PROVIDER"]
+        d["os_auth_type"] = os.environ["OS_AUTH_TYPE"]
 
-    d["checkin_client_id"] = os.environ["CHECKIN_CLIENT_ID"]
-    d["checkin_client_secret"] = os.environ["CHECKIN_CLIENT_SECRET"]
-    d["checkin_refresh_token"] = os.environ["CHECKIN_REFRESH_TOKEN"]
-    d["checkin_auth_url"] = os.environ["CHECKIN_AUTH_URL"]
+        d["checkin_client_id"] = os.environ["CHECKIN_CLIENT_ID"]
+        d["checkin_client_secret"] = os.environ["CHECKIN_CLIENT_SECRET"]
+        d["checkin_refresh_token"] = os.environ["CHECKIN_REFRESH_TOKEN"]
+        d["checkin_auth_url"] = os.environ["CHECKIN_AUTH_URL"]
+
+        d["PROVIDERS_SETTINGS_FILENAME"] = os.environ["PROVIDERS_SETTINGS_FILENAME"]
+        d["MAX_OFFSET"] = os.environ["MAX_OFFSET"]
+        d["GOC_DB_URL"] = os.environ["GOC_DB_URL"]
+        d["GOC_DB_PATH"] = os.environ["GOC_DB_PATH"]
+        d["TENANT_NAME"] = os.environ["TENANT_NAME"]
+
+    except:
+        print(colourise("red", "ERROR: os.environment settings not found!"))
 
     return d
 

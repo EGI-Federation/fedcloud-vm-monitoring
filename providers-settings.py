@@ -21,7 +21,7 @@ import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pyGetScopedToken import get_OIDC_Token, get_scoped_Token, get_unscoped_Token
-from utils import colourise, highlight, get_credentials, pretty_hostname
+from utils import colourise, highlight, get_settings, pretty_hostname
 
 
 __author__ = "Giuseppe LA ROCCA"
@@ -32,12 +32,12 @@ __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 
 # EGI GOC database settings
-GOC_DB_URL = "goc.egi.eu"
-path = "gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
+# GOC_DB_URL = "goc.egi.eu"
+# GOC_DB_PATH = "gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
 
 # Other settings:
-PROVIDERS_SETTINGS_FILENAME = "providers-settings.ini"
-TENANT_NAME = "access"
+# PROVIDERS_SETTINGS_FILENAME = "providers-settings.ini"
+# TENANT_NAME = "access"
 
 
 def get_GOCDB_endpoints(goc_db_url, path):
@@ -87,15 +87,18 @@ def main():
     print("Configuring providers settings in progress...")
     print("This operation may take time. Please wait!")
 
+    # Get the user's settings
+    creds = get_settings()
+
     # Get endpoints from the EGI GOCDB
     print(colourise("blue", "Fetching the providers endpoints from the EGI GOCDB"))
-    endpoints = get_GOCDB_endpoints(GOC_DB_URL, path)
+    endpoints = get_GOCDB_endpoints(creds["GOC_DB_URL"], creds["GOC_DB_PATH"])
 
     now = datetime.now()
     now_format = now.strftime("%d/%m/%Y %H:%M:%S")
 
     # Parsing results and save settings
-    with open(PROVIDERS_SETTINGS_FILENAME, "w") as file:
+    with open(creds["PROVIDERS_SETTINGS_FILENAME"], "w") as file:
 
         file.writelines("# Settings of the EGI FedCloud providers\n")
         file.writelines("# Last update: %s\n" % now_format)
@@ -114,7 +117,7 @@ def main():
             if "Y" in production and "Y" in monitored:
 
                 # Get the user's credentials
-                settings = get_credentials()
+                settings = get_settings()
 
                 # Initialize the OIDC token from the EGI AAI Check-In service.
                 token = get_OIDC_Token(
@@ -133,7 +136,7 @@ def main():
                     print(
                         colourise(
                             "green",
-                            "- No.%d project(s) supported by the provider: %s"
+                            "- No.%d tenant(s) supported by the resource provider: %s"
                             % (len(projects), sitename),
                         )
                     )
@@ -145,11 +148,11 @@ def main():
                         project_enabled = project["enabled"]
                         print(project_enabled, project_name)
 
-                        if TENANT_NAME in project_name:
+                        if creds["TENANT_NAME"] in project_name:
                             print(
                                 colourise(
                                     "yellow",
-                                    "- Project tenant published by the provider.",
+                                    "- Tenant published by the resource provider.",
                                 )
                             )
                             # Retrieve a "scoped" token from the provider

@@ -15,28 +15,37 @@
 #  limitations under the License.
 #
 
+import datetime as dt
 import json
 import requests
-import datetime as dt
-from utils import load_provider_settings, colourise, highlight, get_credentials
+import traceback
+from utils import load_provider_settings, colourise, highlight, get_settings
 from pytz import timezone
 from pyGetScopedToken import get_OIDC_Token, get_scoped_Token, get_unscoped_Token
 
 
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.1"
-__date__ = "$Date: 27/04/2021 18:40:27"
+__version__ = "$Revision: 1.0.2"
+__date__ = "$Date: 14/05/2021 18:40:27"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 
 
-# This configuration file contains the settings of EFI cloud providers to be checked.
-PROVIDERS_SETTINGS_FILENAME = "providers-settings.ini"
+# This configuration file contains the settings of EGI cloud providers to be checked.
+# PROVIDERS_SETTINGS_FILENAME = "providers-settings.ini"
 
 # Set the max elapsed time (in hours) for a running instance in the EGI FedCloud infrastructure
 # Considering as offset 1 mounth = 30 days * 24h = 720 hours
-offset = 720
+# MAX_OFFSET = 720
+
+# EGI GOC database settings
+# GOC_DB_URL = "goc.egi.eu"
+# GOC_DB_PATH = "gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
+
+# Other settings:
+# PROVIDERS_SETTINGS_FILENAME = "providers-settings.ini"
+# TENANT_NAME = "fusion"
 
 
 def get_running_instances(compute_url, project_id, token):
@@ -58,9 +67,30 @@ def get_instance_metadata(instance_id, token):
     """ Retrieve details about the running instance """
 
     url = "%s" % instance_id
+    # Add fix for CESGA provider
+    if "cesga.es" in url:
+        url = url.replace("http://", "https://", 1)
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
 
+    # print(url)
     curl = requests.get(url=url, headers=headers)
+    data = curl.json()
+
+    return data
+
+
+def get_instance_diagnostics(instance_id, token):
+    """ Show basic usage data of a running instance """
+
+    url = "%s/diagnostics" % instance_id
+    # Add fix for CESGA provider
+    if "cesga.es" in url:
+        url = url.replace("http://", "https://", 1)
+    headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
+
+    print(url)
+    curl = requests.get(url=url, headers=headers)
+    print(curl.status_code)
     data = curl.json()
 
     return data
@@ -70,8 +100,12 @@ def get_instance_ip(instance_id, token):
     """ Retrieve the IPs of the running instance """
 
     url = "%s/ips" % instance_id
+    # Add fix for CESGA provider
+    if "cesga.es" in url:
+        url = url.replace("http://", "https://", 1)
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
 
+    # print(url)
     curl = requests.get(url=url, headers=headers)
     if curl.status_code == 200:
         data = curl.json()
@@ -118,14 +152,15 @@ def delete_instance(instance_id, token):
         url = "%s" % instance_id
         headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
 
-        delete_files = raw_input("Do you want to remove the running VM (y/n) ? ")
+        delete_files = input("Do you want to remove the running VM (y/n) ? ")
         if delete_files in ["Y", "y", "Yes", "yes", "YES", "true", "TRUE", "True"]:
             curl = requests.delete(url=url, headers=headers)
 
             if curl.status_code == 204:
-                print("[DONE] Server instance successfully removed from the provider.")
+                text = "[DONE] Server instance successfully removed from the provider."
+                print(colourise("green", text))
 
-            if curl.status_code == 409:
+            elif curl.status_code == 409:
                 text = "WARNING: Unable to remove the running VM. The VM is locked by the user."
                 print(colourise("red", text))
             else:
@@ -137,8 +172,8 @@ def delete_instance(instance_id, token):
 
 def main():
 
-    # Get the user's credentials
-    creds = get_credentials()
+    # Get the user's settings
+    creds = get_settings()
 
     # Initialize the OIDC token from the EGI AAI Check-In service.
     token = get_OIDC_Token(
@@ -149,7 +184,7 @@ def main():
     )
 
     # Loading the configuration settings of the EGI training providers
-    providers = load_provider_settings(PROVIDERS_SETTINGS_FILENAME)
+    providers = load_provider_settings(creds["PROVIDERS_SETTINGS_FILENAME"])
 
     for index in range(0, len(providers)):
         # Parsing the providers JSON object
@@ -170,7 +205,7 @@ def main():
 
         # print(scoped_token)
 
-        # Get the list of the running instances in the selected provider
+        # Get the list of the running servers in the selected provider
         instances = get_running_instances(
             provider_compute, provider_project_id, scoped_token
         )
@@ -186,81 +221,100 @@ def main():
                 if instances["servers"][index]["links"]:
                     # Get the instance_id
                     instance_id = instances["servers"][index]["links"][0]["href"]
-                    # Get the instance metadata
+
+                    # Get the usage data for the server
+                    # diagnostics = get_instance_diagnostics(instance_id, scoped_token)
+                    # print(diagnostics)
+
+                    # Get the server metadata
                     vm_details = get_instance_metadata(instance_id, scoped_token)
                     # print("\n%s" %json.dumps(vm_details, indent=4, sort_keys=False))
-                    created = vm_details["server"]["created"]
-                    status = vm_details["server"]["status"]
-                    instance_name = vm_details["server"]["name"]
+                    if vm_details:
+                        created = vm_details["server"]["created"]
+                        status = vm_details["server"]["status"]
+                        instance_name = vm_details["server"]["name"]
 
-                    # Retrieve the list of network interfaces of the instance
-                    ip_details = get_instance_ip(instance_id, scoped_token)
-                    # print("\n%s" %json.dumps(ip_details, indent=4, sort_keys=False))
-                    for key in ip_details["addresses"]:
-                        # Get the nmax of addresses
-                        nmax = len(ip_details["addresses"][key])
-                        ip_address = ip_details["addresses"][key][nmax - 1]["addr"]
+                        # Retrieve the list of network interfaces of the instance
+                        ip_details = get_instance_ip(instance_id, scoped_token)
+                        # print("\n%s" %json.dumps(ip_details, indent=4, sort_keys=False))
+                        for key in ip_details["addresses"]:
+                            # Get the nmax of addresses
+                            nmax = len(ip_details["addresses"][key])
+                            ip_address = ip_details["addresses"][key][nmax - 1]["addr"]
 
-                    # Retrieve the flavor details
-                    flavor_id = vm_details["server"]["flavor"]["id"]
-                    flavor_details = get_flavor(
-                        provider_compute, flavor_id, scoped_token
-                    )
-                    # print("\n%s" %json.dumps(flavor_details, indent=4, sort_keys=False))
-                    # Check status code from the requests...
-                    if flavor_details[0] == 200:
-                        flavor_name = flavor_details[1]["flavor"]["name"]
-                        flavor_vcpus = flavor_details[1]["flavor"]["vcpus"]
-                        flavor_ram = flavor_details[1]["flavor"]["ram"]
-                        flavor_disk = flavor_details[1]["flavor"]["disk"]
-
-                    # Print VM instance metadata
-                    print("_" + "_" * 60)
-                    print("- instance name = %s " % instance_name)
-                    print("- instance_id   = %s " % instance_id)
-                    print("- status        = %s " % status)
-                    print("- ip address    = %s " % ip_address)
-                    if flavor_details[0] == 200:
-                        print(
-                            "- image flavor  = %s with %s vCPU cores, %s of RAM and %sGB of local disk "
-                            % (flavor_name, flavor_vcpus, flavor_ram, flavor_disk)
+                        # Retrieve the flavor details
+                        flavor_id = vm_details["server"]["flavor"]["id"]
+                        flavor_details = get_flavor(
+                            provider_compute, flavor_id, scoped_token
                         )
-                    print("- created at    = %s " % created)
+                        # print("\n%s" %json.dumps(flavor_details, indent=4, sort_keys=False))
+                        # Check status code from the requests...
+                        if flavor_details[0] == 200:
+                            flavor_name = flavor_details[1]["flavor"]["name"]
+                            flavor_vcpus = flavor_details[1]["flavor"]["vcpus"]
+                            flavor_ram = flavor_details[1]["flavor"]["ram"]
+                            flavor_disk = flavor_details[1]["flavor"]["disk"]
 
-                    # Check the lifetime of the running instance
-                    created = dt.datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ")
-                    created_utc = timezone("UCT").localize(created)
-                    time_utc = dt.datetime.now(timezone("UCT"))
-                    duration = (time_utc - created_utc).total_seconds() / 3600
-                    print("- elapsed time  = %s (hours)" % format(duration, ".2f"))
-
-                    user_id = vm_details["server"]["user_id"]
-                    # Get the (real) user from Keystone
-                    user_details = get_user(provider_identity, user_id, scoped_token)
-
-                    if user_details:
-                        username = user_details["user"]["name"]
-                        print("- created by    = %s " % username)
-                    else:
-                        print("- created by    = %s " % user_id)
-
-                    if status == "ACTIVE":
-                        if int(duration) > offset:
-                            text = "\n[-] WARNING: The VM instance elapsed time exceed the max offset!"
-                            print(colourise("cyan", text))
-
-                            text = "[-] Deleting of the instance [%s] in progress ..."
+                        # Print VM instance metadata
+                        print("_" + "_" * 60)
+                        print("- instance name = %s " % instance_name)
+                        print("- instance_id   = %s " % instance_id)
+                        if "ACTIVE" in status:
+                            color = "green"
+                        elif "BUILD" in status:
+                            color = "yellow"
+                        else:
+                            color = "red"
+                        print("- status        = %s " % colourise(color, status))
+                        print("- ip address    = %s " % ip_address)
+                        if flavor_details[0] == 200:
                             print(
-                                highlight(
-                                    "red", text % instance_id[-36 : len(instance_id)]
-                                )
+                                "- image flavor  = %s with %s vCPU cores, %s of RAM and %sGB of local disk "
+                                % (flavor_name, flavor_vcpus, flavor_ram, flavor_disk)
                             )
-                            delete_instance(instance_id, scoped_token)
+                        print("- created at    = %s " % created)
 
-                    index = index + 1
+                        # Check the lifetime of the running instance
+                        created = dt.datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ")
+                        created_utc = timezone("UCT").localize(created)
+                        time_utc = dt.datetime.now(timezone("UCT"))
+                        duration = (time_utc - created_utc).total_seconds() / 3600
+                        print("- elapsed time  = %s (hours)" % format(duration, ".2f"))
+
+                        user_id = vm_details["server"]["user_id"]
+                        # Get the (real) user from Keystone
+                        user_details = get_user(
+                            provider_identity, user_id, scoped_token
+                        )
+
+                        if user_details:
+                            username = user_details["user"]["name"]
+                            print("- created by    = %s " % username)
+                        else:
+                            print("- created by    = %s " % user_id)
+
+                        if status == "ACTIVE":
+                            if (int(duration) > int(creds["MAX_OFFSET"])) or int(
+                                duration
+                            ) == -1:
+                                text = "\n[-] WARNING: The VM instance elapsed time exceed the max offset!"
+                                print(colourise("cyan", text))
+
+                                text = (
+                                    "[-] Deleting of the instance [%s] in progress ..."
+                                )
+                                print(
+                                    highlight(
+                                        "red",
+                                        text % instance_id[-36 : len(instance_id)],
+                                    )
+                                )
+                                delete_instance(instance_id, scoped_token)
+
+                        index = index + 1
 
         else:
-            print("No VMs instances found in the server: %s" % provider_name)
+            print("- No VMs instances found in the server: %s" % provider_name)
 
         print("")
 
