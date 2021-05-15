@@ -6,18 +6,13 @@ The clients work with OpenStack cloud providers supporting the OIDC protocol.
 
 ## Requirements
 
-* Basic knowledge of the `json`, `requests`, `ConfigParser` and other basic python
+* Basic knowledge of the `json`, `requests`, `configparser` and other basic python
   libraries are requested
 * Python v3.5+
-* Cloud providers enabling the `"identity:get_user": ""` policy
 
 ## Configure the environment
 
 Edit and export the settings:
-
-* `CHECKIN_CLIENT_ID`,
-* `CHECKIN_CLIENT_SECRET`, and
-* `CHECKIN_REFRESH_TOKEN`
 
 <pre>
 ]$ cat openrc.sh
@@ -35,6 +30,21 @@ export CHECKIN_CLIENT_ID="..."
 export CHECKIN_CLIENT_SECRET="..."
 export CHECKIN_REFRESH_TOKEN="..."
 export CHECKIN_AUTH_URL="https://aai.egi.eu/oidc/token"
+
+# This configuration file contains the settings of EGI cloud providers to be checked.
+export PROVIDERS_SETTINGS_FILENAME="providers-settings.ini"
+
+# Set the max elapsed time (in hours) for a running instance in the EGI FedCloud infrastructure
+# E.g.: 1 mounth = 30 days * 24h = 720 hours
+# If MAX_OFFSET=-1, all the running VMs in the tenant of the providers will be deleted
+export MAX_OFFSET=720
+
+# EGI GOC database settings 
+export GOC_DB_URL="goc.egi.eu"
+export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
+
+# The tenant name to be monitored in the cloud providers.
+export TENANT_NAME="access"
 
 # Sourcing the env. variables
 ]$ . openrc.sh
@@ -67,14 +77,6 @@ For simple one-off requests, use this library as a drop-in replacement
 for the requests library:
 
 <pre>
-# This configuration file contains the EGI cloud providers settings.
-PROVIDERS_SETTINGS_FILENAME = "providers-settings.ini"
-
-# The tenant name to be monitored in the cloud providers.
-TENANT_NAME = "access"
-</pre>
-
-<pre>
 ]$ python providers-settings.py
 
 Configuring providers settings in progress...
@@ -96,7 +98,7 @@ Fetching the providers endpoints from the EGI GOCDB
 Saving providers settings [DONE]
 </pre>
 
-The providers settings supporting the `access` tenant is stored in
+The settings of the cloud providers supporting the `access` tenant are stored in
 the `PROVIDERS_SETTINGS_FILENAME` file:
 
 <pre>
