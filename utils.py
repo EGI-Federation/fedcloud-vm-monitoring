@@ -15,14 +15,18 @@
 #  limitations under the License.
 #
 
-# import ConfigParser
 import configparser
+import json
 import os
+import urllib
+from datetime import datetime
+from urllib.request import Request, urlopen, ssl, socket
+from urllib.error import URLError, HTTPError
 
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.2"
-__date__ = "$Date: 14/05/2021 18:40:27"
+__version__ = "$Revision: 1.0.3"
+__date__ = "$Date: 22/05/2021 09:42:27"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 
@@ -79,7 +83,6 @@ def load_provider_settings(file):
     providers = []
 
     # Reading configuration file
-    # config = ConfigParser.ConfigParser()
     config = configparser.ConfigParser()
     config.read(filename)
 
@@ -91,7 +94,8 @@ def load_provider_settings(file):
             {
                 "provider": {
                     "ROC_name": config.get(section, "ROC_Name"),
-                    "name": config.get(section, "Name"),
+                    "sitename": config.get(section, "Sitename"),
+                    "hostname": config.get(section, "Hostname"),
                     "country": config.get(section, "Country"),
                     "identity": config.get(section, "Identity"),
                     "compute": config.get(section, "Compute"),
@@ -124,6 +128,8 @@ def get_settings():
         d["GOC_DB_PATH"] = os.environ["GOC_DB_PATH"]
         d["TENANT_NAME"] = os.environ["TENANT_NAME"]
 
+        d["VERBOSE"] = os.environ["VERBOSE"]
+
     except:
         print(colourise("red", "ERROR: os.environment settings not found!"))
 
@@ -135,3 +141,32 @@ def pretty_hostname(url):
 
     tmp = url.split("/")
     return tmp[0] + "//" + tmp[2] + "/" + tmp[3]
+
+
+def check_SSL_certificate(url, verbose):
+    """ Check SSL certificate expiration date of a server hostname """
+
+    hostname = urllib.parse.urlparse(url).hostname
+    port = urllib.parse.urlparse(url).port
+
+    if verbose == 1:
+        print("- Checking SSL certificate in progres...")
+    now = datetime.now()
+    context = ssl.create_default_context()
+    with socket.create_connection((hostname, port)) as sock:
+        with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+            if verbose == 1:
+                print(json.dumps(ssock.getpeercert()))
+
+            expire_data = json.dumps(ssock.getpeercert()["notAfter"][:-4])
+
+            # Stripping (") from string
+            expire_data = expire_data[1:]
+            expire_data = expire_data[:-1]
+
+            date_time_obj = datetime.strptime(expire_data, "%b %d %H:%M:%S %Y")
+
+            if date_time_obj > now:
+                return "valid"
+            else:
+                return "expired"

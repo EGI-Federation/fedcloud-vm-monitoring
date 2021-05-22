@@ -18,26 +18,26 @@
 import json
 import os
 import requests
+import sys
+import traceback
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pyGetScopedToken import get_OIDC_Token, get_scoped_Token, get_unscoped_Token
-from utils import colourise, highlight, get_settings, pretty_hostname
+from utils import (
+    colourise,
+    highlight,
+    get_settings,
+    pretty_hostname,
+    check_SSL_certificate,
+)
 
 
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.1"
-__date__ = "$Date: 27/04/2021 18:40:27"
+__version__ = "$Revision: 1.0.2"
+__date__ = "$Date: 22/05/2021 09:46:33"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
-
-# EGI GOC database settings
-# GOC_DB_URL = "goc.egi.eu"
-# GOC_DB_PATH = "gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
-
-# Other settings:
-# PROVIDERS_SETTINGS_FILENAME = "providers-settings.ini"
-# TENANT_NAME = "access"
 
 
 def get_GOCDB_endpoints(goc_db_url, path):
@@ -58,7 +58,6 @@ def get_service_catalogue_details(os_auth_url, unscoped_token):
     url = "%s/auth/catalog" % (os_auth_url)
     headers = {"X-Auth-Token": "%s" % unscoped_token}
 
-    # print(url)
     curl = requests.get(url=url, headers=headers)
 
     if curl.status_code == 200:
@@ -88,17 +87,18 @@ def main():
     print("This operation may take time. Please wait!")
 
     # Get the user's settings
-    creds = get_settings()
+    env = get_settings()
+    verbose = env["VERBOSE"]
 
     # Get endpoints from the EGI GOCDB
     print(colourise("blue", "Fetching the providers endpoints from the EGI GOCDB"))
-    endpoints = get_GOCDB_endpoints(creds["GOC_DB_URL"], creds["GOC_DB_PATH"])
+    endpoints = get_GOCDB_endpoints(env["GOC_DB_URL"], env["GOC_DB_PATH"])
 
     now = datetime.now()
     now_format = now.strftime("%d/%m/%Y %H:%M:%S")
 
     # Parsing results and save settings
-    with open(creds["PROVIDERS_SETTINGS_FILENAME"], "w") as file:
+    with open(env["PROVIDERS_SETTINGS_FILENAME"], "w") as file:
 
         file.writelines("# Settings of the EGI FedCloud providers\n")
         file.writelines("# Last update: %s\n" % now_format)
@@ -108,6 +108,7 @@ def main():
             production = item.find("IN_PRODUCTION").text
             monitored = item.find("NODE_MONITORED").text
             country = item.find("COUNTRY_NAME").text
+            country_code = item.find("COUNTRY_CODE").text
             rocname = item.find("ROC_NAME").text
             sitename = item.find("SITENAME").text
             hostname = item.find("HOSTNAME").text
@@ -115,6 +116,23 @@ def main():
             gocdb_portal_url = item.find("GOCDB_PORTAL_URL").text
 
             if "Y" in production and "Y" in monitored:
+                print("\n- Fetching metadata from %s" % sitename)
+
+                # Check the SSL host certificate of the hostname
+                cert = check_SSL_certificate(os_auth_url, env["VERBOSE"])
+                if "valid" in cert:
+                    print(
+                        colourise(
+                            "green", "- The SSL host certificate of the server is valid"
+                        )
+                    )
+                else:
+                    print(
+                        colourise(
+                            "red",
+                            "- The SSL host certificate of the server is NOT valid",
+                        )
+                    )
 
                 # Get the user's credentials
                 settings = get_settings()
@@ -131,7 +149,7 @@ def main():
                     # Retrieve an "unscoped" token from the provider
                     unscoped_token = get_unscoped_Token(os_auth_url, token)
 
-                    # Get the list of projects enabled in the provider
+                    print("\n- Get the list of projects *supported* by the provider")
                     projects = get_projects(os_auth_url, unscoped_token)
                     print(
                         colourise(
@@ -141,6 +159,9 @@ def main():
                         )
                     )
 
+                    if verbose == 1:
+                        print(projects)
+
                     for project in projects:
                         # Get the project metadata
                         project_id = project["id"]
@@ -148,7 +169,7 @@ def main():
                         project_enabled = project["enabled"]
                         print(project_enabled, project_name)
 
-                        if creds["TENANT_NAME"] in project_name:
+                        if env["TENANT_NAME"] in project_name:
                             print(
                                 colourise(
                                     "yellow",
@@ -182,8 +203,11 @@ def main():
                             file.writelines("\n")
                             file.writelines("[%s]\n" % sitename)
                             file.writelines("ROC_Name: %s\n" % rocname)
-                            file.writelines("Name: %s\n" % sitename)
-                            file.writelines("Country: %s\n" % country)
+                            file.writelines("Sitename: %s\n" % sitename)
+                            file.writelines("Hostname: %s\n" % hostname)
+                            file.writelines(
+                                "Country: %s [%s]\n" % (country, country_code)
+                            )
                             file.writelines("Identity: %s\n" % os_auth_url)
                             file.writelines("Compute: %s\n" % nova_endpoint)
                             file.writelines("GOC Portal URL: %s\n" % gocdb_portal_url)
@@ -191,6 +215,7 @@ def main():
                             file.writelines("ProjectID: %s\n" % project_id)
                             file.flush()
                 except:
+                    traceback.print_exc()
                     pass
 
         file.close()

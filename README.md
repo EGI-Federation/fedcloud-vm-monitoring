@@ -46,6 +46,11 @@ export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org
 # The tenant name to be monitored in the cloud providers.
 export TENANT_NAME="access"
 
+# Enable verbose logging
+# VERBOSE=0, no verbose logging is OFF
+# VERBOSE=1, verbose logging is ON
+export VERBOSE=1
+
 # Sourcing the env. variables
 ]$ . openrc.sh
 </pre>
@@ -63,8 +68,9 @@ For each cloud provider, the following settings are provided:
 <pre>
 [PROVIDER HOSTNAME]
 ROC_Name: ROC_NAME 
+Sitename: PROVIDER SITENAME
 Name: PROVIDER HOSTNAME
-Country: COUNTRY OF THE PROVIDER
+Country: COUNTRY OF THE PROVIDER [COUNTRY ISO CODE]
 Identity: KEYSTONE_URL
 Compute: NOVA_URL
 GOC Portal URL: ENTRY IN THE EGI GOCDB
@@ -77,23 +83,35 @@ For simple one-off requests, use this library as a drop-in replacement
 for the requests library:
 
 <pre>
-]$ python providers-settings.py
+]$ python3 providers-settings.py
 
 Configuring providers settings in progress...
 This operation may take time. Please wait!
 Fetching the providers endpoints from the EGI GOCDB
-- No.5 project(s) supported by the provider: IFCA-LCG2
-(True, u'VO:vo.nextgeoss.eu')
-(False, u'VO:vo.mrilab.es')
-(True, u'VO:vo.access.egi.eu')
-- Project tenant published by the provider.
-(True, u'VO:enmr.eu')
-(True, u'VO:training.egi.eu')
-- No.3 project(s) supported by the provider: IN2P3-IRES
-(True, u'EGI_biomed')
-(True, u'EGI_access')
-- Project tenant published by the provider.
-(True, u'EGI_FCTF')
+
+- Fetching metadata from IFCA-LCG2
+- The SSL host certificate of the server is valid
+
+- Get the list of projects *supported* by the provider
+- No.7 tenant(s) supported by the resource provider: IFCA-LCG2
+True VO:vo.nextgeoss.eu
+True VO:acc-comp.egi.eu
+False VO:vo.mrilab.es
+True VO:openrisknet.eu
+True VO:vo.access.egi.eu
+True VO:enmr.eu
+True VO:training.egi.eu
+- Tenant published by the resource provider.
+
+- Fetching metadata from IN2P3-IRES
+- The SSL host certificate of the server is valid
+
+- Get the list of projects *supported* by the provider
+- No.3 tenant(s) supported by the resource provider: IN2P3-IRES
+True EGI_biomed
+True EGI_access
+True EGI_FCTF
+
 [..]
 Saving providers settings [DONE]
 </pre>
@@ -110,8 +128,8 @@ the `PROVIDERS_SETTINGS_FILENAME` file:
 
 [IFCA-LCG2]
 ROC_Name: NGI_IBERGRID
-Name: IFCA-LCG2
-Country: Spain
+Sitename: IFCA-LCG2
+Country: Spain [ES]
 Identity: https://api.cloud.ifca.es:5000/v3/
 Compute: https://api.cloud.ifca.es:8774/v2.1
 GOC Portal URL: https://goc.egi.eu/portal/index.php?Page_Type=Service&id=7513
@@ -124,17 +142,18 @@ ProjectID: 999f045cb1ff4684a15ebb338af69460
 ## Checking long-running VM instances running in the EGI Federation
 
 <pre>
-]$ python fedcloud-vm-monitoring.py 
+]$ python3 fedcloud-vm-monitoring.py 
 
 [.] Reading settings of the provider: IFCA-LCG2 
 {
     "provider": {
-        "compute": "https://api.cloud.ifca.es:8774/v2.1", 
-        "name": "IFCA-LCG2", 
-        "country": "Spain", 
-        "ROC_name": "NGI_IBERGRID", 
-        "project_id": "999f045cb1ff4684a15ebb338af69460", 
-        "identity": "https://api.cloud.ifca.es:5000/v3/"
+        "hostname": "api.cloud.ifca.es",
+        "project_id": "f1d0308880134d04964097524eace710",
+        "sitename": "IFCA-LCG2",
+        "ROC_name": "NGI_IBERGRID",
+        "compute": "https://api.cloud.ifca.es:8774/v2.1",
+        "identity": "https://api.cloud.ifca.es:5000/v3/",
+        "country": "Spain [ES]"
     }
 }
 

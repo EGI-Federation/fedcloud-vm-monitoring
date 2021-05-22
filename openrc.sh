@@ -25,4 +25,4 @@ export GOC_DB_URL="goc.egi.eu"
 export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
 
 # Other settings
-export TENANT_NAME="training"
+export TENANT_NAME="access"

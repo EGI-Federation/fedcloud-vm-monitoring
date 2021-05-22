@@ -26,26 +26,10 @@ from pyGetScopedToken import get_OIDC_Token, get_scoped_Token, get_unscoped_Toke
 
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.2"
-__date__ = "$Date: 14/05/2021 18:40:27"
+__version__ = "$Revision: 1.0.3"
+__date__ = "$Date: 21/05/2021 10:26:17"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
-
-
-# This configuration file contains the settings of EGI cloud providers to be checked.
-# PROVIDERS_SETTINGS_FILENAME = "providers-settings.ini"
-
-# Set the max elapsed time (in hours) for a running instance in the EGI FedCloud infrastructure
-# Considering as offset 1 mounth = 30 days * 24h = 720 hours
-# MAX_OFFSET = 720
-
-# EGI GOC database settings
-# GOC_DB_URL = "goc.egi.eu"
-# GOC_DB_PATH = "gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
-
-# Other settings:
-# PROVIDERS_SETTINGS_FILENAME = "providers-settings.ini"
-# TENANT_NAME = "fusion"
 
 
 def get_running_instances(compute_url, project_id, token):
@@ -59,6 +43,7 @@ def get_running_instances(compute_url, project_id, token):
         data = curl.json()
     else:
         raise RuntimeError("Unable to get running instances!")
+        traceback.print_exc()
 
     return data
 
@@ -72,7 +57,6 @@ def get_instance_metadata(instance_id, token):
         url = url.replace("http://", "https://", 1)
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
 
-    # print(url)
     curl = requests.get(url=url, headers=headers)
     data = curl.json()
 
@@ -188,7 +172,7 @@ def main():
 
     for index in range(0, len(providers)):
         # Parsing the providers JSON object
-        provider_name = providers[index]["provider"]["name"]
+        provider_name = providers[index]["provider"]["hostname"]
         provider_identity = providers[index]["provider"]["identity"]
         provider_compute = providers[index]["provider"]["compute"]
         provider_project_id = providers[index]["provider"]["project_id"]
@@ -309,7 +293,7 @@ def main():
                                         text % instance_id[-36 : len(instance_id)],
                                     )
                                 )
-                                delete_instance(instance_id, scoped_token)
+                                # delete_instance(instance_id, scoped_token)
 
                         index = index + 1
 
