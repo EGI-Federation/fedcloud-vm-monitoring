@@ -144,36 +144,49 @@ ProjectID: 999f045cb1ff4684a15ebb338af69460
 <pre>
 ]$ python3 fedcloud-vm-monitoring.py 
 
-[.] Reading settings of the provider: IFCA-LCG2 
+[.] Reading settings of the provider: api.cloud.ifca.es 
 {
     "provider": {
-        "hostname": "api.cloud.ifca.es",
-        "project_id": "f1d0308880134d04964097524eace710",
         "sitename": "IFCA-LCG2",
-        "ROC_name": "NGI_IBERGRID",
-        "compute": "https://api.cloud.ifca.es:8774/v2.1",
         "identity": "https://api.cloud.ifca.es:5000/v3/",
-        "country": "Spain [ES]"
+        "hostname": "api.cloud.ifca.es",
+        "ROC_name": "NGI_IBERGRID",
+        "country": "Spain [ES]",
+        "compute": "https://api.cloud.ifca.es:8774/v2.1",
+        "project_id": "999f045cb1ff4684a15ebb338af69460"
     }
 }
 
-[+] Total VM instance(s) running in the provider = [#1]
+[+] Total VM instance(s) running in the provider = [#3]
 _____________________________________________________________
-- instance name = EGI_CentOS_8-161470352152 
-- instance_id   = https://api.cloud.ifca.es:8774/v2.1/999f045cb1ff4684a15ebb338af69460/servers/966d49a2-81ac-4301-9d92-d68c7dfbc75a 
+- instance name = test 
+- instance_id   = https://api.cloud.ifca.es:8774/v2.1/999f045cb1ff4684a15ebb338af69460/servers/044959ce-a3f8-4fe9-bd6f-31b6cc3f6b27 
 - status        = ACTIVE 
-- ip address    = 193.146.75.230 
+- ip address    = 172.16.8.3 
+- image flavor  = m1.small with 1 vCPU cores, 2000 of RAM and 10GB of local disk 
+- created at    = 2021-05-24T09:03:28Z 
+- elapsed time  = 0.49 (hours)
+- created by    = 025166931789a0f57793a6092726c2ad89387a4cc167e7c63c5d85fc91021d18@egi.eu 
+
+[-] WARNING: The VM instance elapsed time exceed the max offset!
+[-] Deleting of the instance [044959ce-a3f8-4fe9-bd6f-31b6cc3f6b27] in progress ...
+Do you want to remove the running VM (y/n) ? y
+[DONE] Server instance successfully removed from the provider.
+_____________________________________________________________
+- instance name = EGI_Ubuntu_20_04-162099572521 
+- instance_id   = https://api.cloud.ifca.es:8774/v2.1/999f045cb1ff4684a15ebb338af69460/servers/328e3845-93c0-4d57-bd10-11acfd9c5ee7 
+- status        = ACTIVE 
+- ip address    = 172.16.8.13 
 - image flavor  = cm4.2xlarge with 8 vCPU cores, 15000 of RAM and 30GB of local disk 
-- created at    = 2021-03-02T16:45:28Z 
-- elapsed time  = 1389.98 (hours)
+- created at    = 2021-05-14T12:35:27Z 
+- elapsed time  = 236.97 (hours)
   WARNING   = User not authorized to perform the requested action: 'identity:get_user'
-- created by    = 5bd063142ec146a1ba93b794eaded9d2 
+- created by    = aba1ce2db1694003879ac987e08c87b1 
 
-[-] <b>WARNING: The VM instance elapsed time exceed the max offset!
-[-]    Deleting of the instance [966d49a2-81ac-4301-9d92-d68c7dfbc75a] in progress ...
-       Do you want to remove the running VM (y/n) ? y</b>
+[-] WARNING: The VM instance elapsed time exceed the max offset!
+[-] Deleting of the instance [328e3845-93c0-4d57-bd10-11acfd9c5ee7] in progress ...
+Do you want to remove the running VM (y/n) ? n
 [..]
-
 </pre>
 
 ## Links
