@@ -119,20 +119,20 @@ def main():
                 print("\n- Fetching metadata from %s" % sitename)
 
                 # Check the SSL host certificate of the hostname
-                cert = check_SSL_certificate(os_auth_url, env["VERBOSE"])
-                if "valid" in cert:
-                    print(
-                        colourise(
-                            "green", "- The SSL host certificate of the server is valid"
-                        )
-                    )
-                else:
-                    print(
-                        colourise(
-                            "red",
-                            "- The SSL host certificate of the server is NOT valid",
-                        )
-                    )
+                #cert = check_SSL_certificate(os_auth_url, env["VERBOSE"])
+                #if "valid" in cert:
+                #    print(
+                #        colourise(
+                #            "green", "- The SSL host certificate of the server is valid"
+                #        )
+                #    )
+                #else:
+                #    print(
+                #        colourise(
+                #            "red",
+                #            "- The SSL host certificate of the server is NOT valid",
+                #        )
+                #    )
 
                 # Get the user's credentials
                 settings = get_settings()

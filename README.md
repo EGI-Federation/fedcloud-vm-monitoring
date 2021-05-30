@@ -8,9 +8,72 @@ The clients work with OpenStack cloud providers supporting the OIDC protocol.
 
 * Basic knowledge of the `json`, `requests`, `configparser` and other basic python
   libraries are requested
-* Python v3.5+
+* Basic knowledge of virtualenv
+* Python v3.9+
 
-## Configure the environment
+## Installation
+
+Make sure that your environment has the EGI CAs properly installed and
+configured for python:
+
+If you don’t have the CA certificates installed in your machine, you can get
+them from the [UMD EGI core Trust Anchor Distribution](http://repository.egi.eu/?category_name=cas)
+
+Once installed, get the location of the requests CA bundle with:
+
+```
+python3 -m requests.certs
+```
+
+If the output of that command is `/etc/ssl/certs/ca-certificates.crt`, you can
+add EGI CAs by executing:
+
+```
+cd /usr/local/share/ca-certificates
+for f in /etc/grid-security/certificates/*.pem ; do ln -s $f $(basename $f .pem).crt; done
+update-ca-certificates
+```
+
+If the output is `/etc/pki/tls/certs/ca-bundle.crt` add the EGI CAs with:
+
+```
+cd /etc/pki/ca-trust/source/anchors
+ln -s /etc/grid-security/certificates/*.pem .
+update-ca-trust extract
+```
+
+Otherwise, you are using internal requests bundle, which can be augmented with
+the EGI CAs with:
+
+```
+cat /etc/grid-security/certificates/*.pem >> $(python -m requests.certs)
+```
+
+## Configuring the environment
+
+Use virtualenv to configure the working:
+
+<pre>
+]$ virtualenv -p /usr/bin/python3.9 venv
+Running virtualenv with interpreter /usr/bin/python3.9
+Using base prefix '/usr'
+/usr/local/lib/python2.7/dist-packages/virtualenv.py:1047: DeprecationWarning: the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses
+  import imp
+New python executable in /home/larocca/APIs/fedcloud-vm-monitoring/venv/bin/python3.9
+Also creating executable in /home/larocca/APIs/fedcloud-vm-monitoring/venv/bin/python
+Installing setuptools, pip, wheel...done.
+
+]$ source venv/bin/activate
+</pre>
+
+Install the missing libraries with pip:
+
+<pre>
+]$ python3 -m pip install requests pytz
+[..]
+</pre>
+
+## Configure settings
 
 Edit and export the settings:
 
