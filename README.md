@@ -8,7 +8,7 @@ The clients work with OpenStack cloud providers supporting the OIDC protocol.
 
 * Basic knowledge of the `json`, `requests`, `configparser` and other basic python
   libraries are requested
-* Basic knowledge of virtualenv
+* Basic knowledge of `virtualenv`
 * Python v3.9+
 
 ## Installation
@@ -202,7 +202,7 @@ ProjectID: 999f045cb1ff4684a15ebb338af69460
 [..]
 </pre>
 
-## Checking long-running VM instances running in the EGI Federation
+## Checking long-running VM instances in the EGI Federated Cloud
 
 <pre>
 ]$ python3 fedcloud-vm-monitoring.py 
@@ -252,7 +252,7 @@ Do you want to remove the running VM (y/n) ? n
 [..]
 </pre>
 
-## Links
+## Useful links
 
 * https://docs.openstack.org/api-ref/
 * https://docs.openstack.org/keystone/pike/api_curl_examples.html
