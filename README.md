@@ -51,9 +51,9 @@ cat /etc/grid-security/certificates/*.pem >> $(python -m requests.certs)
 
 ## Configuring the environment
 
-Use virtualenv to configure the working:
+Use virtualenv to configure the working environment:
 
-<pre>
+```
 ]$ virtualenv -p /usr/bin/python3.9 venv
 Running virtualenv with interpreter /usr/bin/python3.9
 Using base prefix '/usr'
@@ -64,20 +64,20 @@ Also creating executable in /home/larocca/APIs/fedcloud-vm-monitoring/venv/bin/p
 Installing setuptools, pip, wheel...done.
 
 ]$ source venv/bin/activate
-</pre>
+```
 
-Install the missing libraries with pip:
+Install the libraries `requests` and `pytz` with pip:
 
-<pre>
+```
 ]$ python3 -m pip install requests pytz
 [..]
-</pre>
+```
 
 ## Configure settings
 
 Edit and export the settings:
 
-<pre>
+```
 ]$ cat openrc.sh
 
 #!/bin/bash
@@ -102,7 +102,7 @@ export PROVIDERS_SETTINGS_FILENAME="providers-settings.ini"
 # If MAX_OFFSET=-1, all the running VMs in the tenant of the providers will be deleted
 export MAX_OFFSET=720
 
-# EGI GOC database settings 
+# EGI GOC database settings
 export GOC_DB_URL="goc.egi.eu"
 export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
 
@@ -116,7 +116,7 @@ export VERBOSE=1
 
 # Sourcing the env. variables
 ]$ . openrc.sh
-</pre>
+```
 
 ## Configure the providers setting
 
@@ -128,24 +128,24 @@ of the cloud providers in production status from the EGI GOCDB service.
 
 For each cloud provider, the following settings are provided:
 
-<pre>
+```
 [PROVIDER HOSTNAME]
-ROC_Name: ROC_NAME 
+ROC_Name: ROC_NAME
 Sitename: PROVIDER SITENAME
 Name: PROVIDER HOSTNAME
 Country: COUNTRY OF THE PROVIDER [COUNTRY ISO CODE]
 Identity: KEYSTONE_URL
 Compute: NOVA_URL
 GOC Portal URL: ENTRY IN THE EGI GOCDB
-ProjectID: PROJECT_ID 
-</pre>
+ProjectID: PROJECT_ID
+```
 
 ## Usage
 
 For simple one-off requests, use this library as a drop-in replacement
 for the requests library:
 
-<pre>
+```
 ]$ python3 providers-settings.py
 
 Configuring providers settings in progress...
@@ -177,12 +177,12 @@ True EGI_FCTF
 
 [..]
 Saving providers settings [DONE]
-</pre>
+```
 
 The settings of the cloud providers supporting the `access` tenant are stored in
 the `PROVIDERS_SETTINGS_FILENAME` file:
 
-<pre>
+```
 ]$ cat providers-settings.ini
 
 # Settings of the EGI FedCloud providers
@@ -200,14 +200,14 @@ GOC Portal URL: https://goc.egi.eu/portal/index.php?Page_Type=Service&id=7513
 ProjectID: 999f045cb1ff4684a15ebb338af69460
 
 [..]
-</pre>
+```
 
 ## Checking long-running VM instances in the EGI Federated Cloud
 
-<pre>
-]$ python3 fedcloud-vm-monitoring.py 
+```
+]$ python3 fedcloud-vm-monitoring.py
 
-[.] Reading settings of the provider: api.cloud.ifca.es 
+[.] Reading settings of the provider: api.cloud.ifca.es
 {
     "provider": {
         "sitename": "IFCA-LCG2",
@@ -222,35 +222,35 @@ ProjectID: 999f045cb1ff4684a15ebb338af69460
 
 [+] Total VM instance(s) running in the provider = [#3]
 _____________________________________________________________
-- instance name = test 
-- instance_id   = https://api.cloud.ifca.es:8774/v2.1/999f045cb1ff4684a15ebb338af69460/servers/044959ce-a3f8-4fe9-bd6f-31b6cc3f6b27 
-- status        = ACTIVE 
-- ip address    = 172.16.8.3 
-- image flavor  = m1.small with 1 vCPU cores, 2000 of RAM and 10GB of local disk 
-- created at    = 2021-05-24T09:03:28Z 
+- instance name = test
+- instance_id   = https://api.cloud.ifca.es:8774/v2.1/999f045cb1ff4684a15ebb338af69460/servers/044959ce-a3f8-4fe9-bd6f-31b6cc3f6b27
+- status        = ACTIVE
+- ip address    = 172.16.8.3
+- image flavor  = m1.small with 1 vCPU cores, 2000 of RAM and 10GB of local disk
+- created at    = 2021-05-24T09:03:28Z
 - elapsed time  = 0.49 (hours)
-- created by    = 025166931789a0f57793a6092726c2ad89387a4cc167e7c63c5d85fc91021d18@egi.eu 
+- created by    = 025166931789a0f57793a6092726c2ad89387a4cc167e7c63c5d85fc91021d18@egi.eu
 
 [-] WARNING: The VM instance elapsed time exceed the max offset!
 [-] Deleting of the instance [044959ce-a3f8-4fe9-bd6f-31b6cc3f6b27] in progress ...
 Do you want to remove the running VM (y/n) ? y
 [DONE] Server instance successfully removed from the provider.
 _____________________________________________________________
-- instance name = EGI_Ubuntu_20_04-162099572521 
-- instance_id   = https://api.cloud.ifca.es:8774/v2.1/999f045cb1ff4684a15ebb338af69460/servers/328e3845-93c0-4d57-bd10-11acfd9c5ee7 
-- status        = ACTIVE 
-- ip address    = 172.16.8.13 
-- image flavor  = cm4.2xlarge with 8 vCPU cores, 15000 of RAM and 30GB of local disk 
-- created at    = 2021-05-14T12:35:27Z 
+- instance name = EGI_Ubuntu_20_04-162099572521
+- instance_id   = https://api.cloud.ifca.es:8774/v2.1/999f045cb1ff4684a15ebb338af69460/servers/328e3845-93c0-4d57-bd10-11acfd9c5ee7
+- status        = ACTIVE
+- ip address    = 172.16.8.13
+- image flavor  = cm4.2xlarge with 8 vCPU cores, 15000 of RAM and 30GB of local disk
+- created at    = 2021-05-14T12:35:27Z
 - elapsed time  = 236.97 (hours)
   WARNING   = User not authorized to perform the requested action: 'identity:get_user'
-- created by    = aba1ce2db1694003879ac987e08c87b1 
+- created by    = aba1ce2db1694003879ac987e08c87b1
 
 [-] WARNING: The VM instance elapsed time exceed the max offset!
 [-] Deleting of the instance [328e3845-93c0-4d57-bd10-11acfd9c5ee7] in progress ...
 Do you want to remove the running VM (y/n) ? n
 [..]
-</pre>
+```
 
 ## Useful links
 
