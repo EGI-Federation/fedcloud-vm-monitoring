@@ -7,8 +7,8 @@ The clients work with OpenStack cloud providers supporting the OIDC protocol.
 ## Requirements
 
 * Basic knowledge of the `json`, `requests`, `configparser` and other basic python
-  libraries are requested
-* Basic knowledge of `virtualenv`
+  libraries is requested
+* Basic knowledge of `virtualenv` is requested
 * Python v3.9+
 
 ## Installation
