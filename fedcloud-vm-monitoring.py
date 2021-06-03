@@ -26,8 +26,8 @@ from pyGetScopedToken import get_OIDC_Token, get_scoped_Token, get_unscoped_Toke
 
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.3"
-__date__ = "$Date: 21/05/2021 10:26:17"
+__version__ = "$Revision: 1.0.4"
+__date__ = "$Date: 03/06/2021 19:05:17"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 
@@ -35,26 +35,24 @@ __license__ = "Apache Licence v2.0"
 def get_running_instances(compute_url, project_id, token):
     """ Get the list of running instances in the provider """
 
-    url = "%s/%s/servers" % (compute_url, project_id)
+    url = "%s/servers" % compute_url
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
 
     curl = requests.get(url=url, headers=headers)
     if curl.status_code == 200:
         data = curl.json()
     else:
-        raise RuntimeError("Unable to get running instances!")
+        # raise RuntimeError("Unable to get running instances!")
         traceback.print_exc()
+        pass
 
     return data
 
 
-def get_instance_metadata(instance_id, token):
+def get_instance_metadata(compute_url, instance_id, token):
     """ Retrieve details about the running instance """
 
-    url = "%s" % instance_id
-    # Add fix for CESGA provider
-    if "cesga.es" in url:
-        url = url.replace("http://", "https://", 1)
+    url = "%s/servers/%s" % (compute_url, instance_id)
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
 
     curl = requests.get(url=url, headers=headers)
@@ -63,34 +61,27 @@ def get_instance_metadata(instance_id, token):
     return data
 
 
-def get_instance_diagnostics(instance_id, token):
+def get_instance_diagnostics(compute_url, instance_id, token):
     """ Show basic usage data of a running instance """
 
-    url = "%s/diagnostics" % instance_id
-    # Add fix for CESGA provider
-    if "cesga.es" in url:
-        url = url.replace("http://", "https://", 1)
+    url = "%s/servers/%s/diagnostics" % (compute_url, instance_id)
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
 
-    print(url)
     curl = requests.get(url=url, headers=headers)
-    print(curl.status_code)
+    # print(curl.status_code)
     data = curl.json()
 
     return data
 
 
-def get_instance_ip(instance_id, token):
+def get_instance_ip(compute_url, instance_id, token):
     """ Retrieve the IPs of the running instance """
 
-    url = "%s/ips" % instance_id
-    # Add fix for CESGA provider
-    if "cesga.es" in url:
-        url = url.replace("http://", "https://", 1)
+    url = "%s/servers/%s/ips" % (compute_url, instance_id)
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
 
-    # print(url)
     curl = requests.get(url=url, headers=headers)
+
     if curl.status_code == 200:
         data = curl.json()
 
@@ -201,17 +192,20 @@ def main():
                 "\n[+] Total VM instance(s) running in the provider = [#%s]"
                 % len(instances["servers"])
             )
+            print(instances["servers"])
             for index in range(0, len(instances["servers"])):
                 if instances["servers"][index]["links"]:
                     # Get the instance_id
-                    instance_id = instances["servers"][index]["links"][0]["href"]
+                    instance_id = instances["servers"][index]["id"]
 
                     # Get the usage data for the server
-                    # diagnostics = get_instance_diagnostics(instance_id, scoped_token)
+                    # diagnostics = get_instance_diagnostics(provider_compute, instance_id, scoped_token)
                     # print(diagnostics)
 
                     # Get the server metadata
-                    vm_details = get_instance_metadata(instance_id, scoped_token)
+                    vm_details = get_instance_metadata(
+                        provider_compute, instance_id, scoped_token
+                    )
                     # print("\n%s" %json.dumps(vm_details, indent=4, sort_keys=False))
                     if vm_details:
                         created = vm_details["server"]["created"]
@@ -219,7 +213,9 @@ def main():
                         instance_name = vm_details["server"]["name"]
 
                         # Retrieve the list of network interfaces of the instance
-                        ip_details = get_instance_ip(instance_id, scoped_token)
+                        ip_details = get_instance_ip(
+                            provider_compute, instance_id, scoped_token
+                        )
                         # print("\n%s" %json.dumps(ip_details, indent=4, sort_keys=False))
                         for key in ip_details["addresses"]:
                             # Get the nmax of addresses
