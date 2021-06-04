@@ -26,8 +26,8 @@ from pyGetScopedToken import get_OIDC_Token, get_scoped_Token, get_unscoped_Toke
 
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.4"
-__date__ = "$Date: 03/06/2021 19:05:17"
+__version__ = "$Revision: 1.0.5"
+__date__ = "$Date: 04/06/2021 10:07:17"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 
@@ -120,11 +120,11 @@ def get_user(identity_url, user_id, token):
     return data
 
 
-def delete_instance(instance_id, token):
+def delete_instance(compute_url, instance_id, token):
     """ Remove server instance from the cloud provider """
 
     try:
-        url = "%s" % instance_id
+        url = "%s/servers/%s" % (compute_url, instance_id)
         headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
 
         delete_files = input("Do you want to remove the running VM (y/n) ? ")
@@ -289,7 +289,9 @@ def main():
                                         text % instance_id[-36 : len(instance_id)],
                                     )
                                 )
-                                # delete_instance(instance_id, scoped_token)
+                                delete_instance(
+                                    provider_compute, instance_id, scoped_token
+                                )
 
                         index = index + 1
 
