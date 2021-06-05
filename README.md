@@ -110,9 +110,9 @@ export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org
 export TENANT_NAME="access"
 
 # Enable verbose logging
-# VERBOSE=0, no verbose logging is OFF
-# VERBOSE=1, verbose logging is ON
-export VERBOSE=1
+# VERBOSE=INFO, no verbose logging is OFF
+# VERBOSE=DEBUG, verbose logging is ON
+export VERBOSE=DEBUG
 
 # Sourcing the env. variables
 ]$ . openrc.sh
