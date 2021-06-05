@@ -116,6 +116,18 @@ def main():
             os_auth_url = item.find("URL").text
             gocdb_portal_url = item.find("GOCDB_PORTAL_URL").text
 
+            # Protocol fix:
+            if (
+                "INFN-CLOUD-BARI" in sitename
+                or "BIFI" in sitename
+                or "EODC" in sitename
+                or "CSTCLOUD-EGI" in sitename
+                or "GWDG-CLOUD" in sitename
+            ):
+                protocol = "oidc"
+            else:
+                protocol = "openid"
+
             if "Y" in production and "Y" in monitored:
                 print(
                     "\n- Fetching metadata from the resource provider: %s"
@@ -129,7 +141,7 @@ def main():
                 # else:
                 #   print(colourise("red", "- The SSL host certificate of the server is NOT valid"))
 
-                # Get the user's credentials
+                # Get environment settings
                 settings = get_settings()
 
                 # Initialize the OIDC token from the EGI AAI Check-In service.
@@ -139,10 +151,9 @@ def main():
                     settings["checkin_client_secret"],
                     settings["checkin_refresh_token"],
                 )
-
                 try:
                     # Retrieve an "unscoped" token from the provider
-                    unscoped_token = get_unscoped_Token(os_auth_url, token)
+                    unscoped_token = get_unscoped_Token(os_auth_url, token, protocol)
 
                     print("- Get the list of projects *supported* by the provider")
                     projects = get_projects(os_auth_url, unscoped_token)
