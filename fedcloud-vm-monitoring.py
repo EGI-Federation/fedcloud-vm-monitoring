@@ -26,8 +26,8 @@ from pyGetScopedToken import get_OIDC_Token, get_scoped_Token, get_unscoped_Toke
 
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.5"
-__date__ = "$Date: 04/06/2021 10:07:17"
+__version__ = "$Revision: 1.0.6"
+__date__ = "$Date: 06/06/2021 10:33:17"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 
@@ -148,18 +148,20 @@ def delete_instance(compute_url, instance_id, token):
 def main():
 
     # Get the user's settings
-    creds = get_settings()
+    env = get_settings()
+    verbose = env["VERBOSE"]
+    print("Verbose Level = %s" % colourise("cyan", verbose))
 
     # Initialize the OIDC token from the EGI AAI Check-In service.
     token = get_OIDC_Token(
-        creds["checkin_auth_url"],
-        creds["checkin_client_id"],
-        creds["checkin_client_secret"],
-        creds["checkin_refresh_token"],
+        env["checkin_auth_url"],
+        env["checkin_client_id"],
+        env["checkin_client_secret"],
+        env["checkin_refresh_token"],
     )
 
     # Loading the configuration settings of the EGI training providers
-    providers = load_provider_settings(creds["PROVIDERS_SETTINGS_FILENAME"])
+    providers = load_provider_settings(env["PROVIDERS_SETTINGS_FILENAME"])
 
     for index in range(0, len(providers)):
         # Parsing the providers JSON object
@@ -168,7 +170,7 @@ def main():
         provider_compute = providers[index]["provider"]["compute"]
         provider_project_id = providers[index]["provider"]["project_id"]
 
-        print("[.] Reading settings of the provider: %s " % provider_name)
+        print("[.] Reading settings of the resource provider: %s " % provider_name)
         print("%s" % json.dumps(providers[index], indent=4, sort_keys=False))
 
         # Retrieve an OpenStack scoped token
@@ -189,10 +191,11 @@ def main():
         index = 1
         if len(instances["servers"]) > 0:
             print(
-                "\n[+] Total VM instance(s) running in the provider = [#%s]"
+                "\n[+] Total VM instance(s) running in the resource provider = [#%s]"
                 % len(instances["servers"])
             )
-            print(instances["servers"])
+            if verbose == "DEBUG":
+                print(instances["servers"])
             for index in range(0, len(instances["servers"])):
                 if instances["servers"][index]["links"]:
                     # Get the instance_id
@@ -228,7 +231,6 @@ def main():
                             provider_compute, flavor_id, scoped_token
                         )
                         # print("\n%s" %json.dumps(flavor_details, indent=4, sort_keys=False))
-                        # Check status code from the requests...
                         if flavor_details[0] == 200:
                             flavor_name = flavor_details[1]["flavor"]["name"]
                             flavor_vcpus = flavor_details[1]["flavor"]["vcpus"]
@@ -274,14 +276,14 @@ def main():
                             print("- created by    = %s " % user_id)
 
                         if status == "ACTIVE":
-                            if (int(duration) > int(creds["MAX_OFFSET"])) or int(
+                            if (int(duration) > int(env["MAX_OFFSET"])) or int(
                                 duration
                             ) == -1:
                                 text = "\n[-] WARNING: The VM instance elapsed time exceed the max offset!"
                                 print(colourise("cyan", text))
 
                                 text = (
-                                    "[-] Deleting of the instance [%s] in progress ..."
+                                    "[-] Deleting of the instance [%s] in progress..."
                                 )
                                 print(
                                     highlight(
@@ -289,14 +291,14 @@ def main():
                                         text % instance_id[-36 : len(instance_id)],
                                     )
                                 )
-                                delete_instance(
-                                    provider_compute, instance_id, scoped_token
-                                )
+                                # delete_instance(provider_compute, instance_id, scoped_token)
 
                         index = index + 1
 
         else:
-            print("- No VMs instances found in the server: %s" % provider_name)
+            print(
+                colourise("yellow", "- No VMs instances found in the resource provider")
+            )
 
         print("")
 

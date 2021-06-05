@@ -26,3 +26,9 @@ export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org
 
 # Other settings
 export TENANT_NAME="access"
+
+# Enable verbose logging
+# VERBOSE=INFO, no verbose logging is OFF
+# VERBOSE=DEBUG, verbose logging is ON
+export VERBOSE=DEBUG
+
