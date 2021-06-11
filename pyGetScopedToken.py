@@ -23,7 +23,7 @@ from urllib.parse import urlparse, urlunparse, urljoin
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
 __version__ = "$Revision: 1.0.0"
-__date__ = "$Date: 05/06/2021 15:46:33"
+__date__ = "$Date: 11/06/2021 15:46:33"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 
@@ -37,14 +37,14 @@ def get_OIDC_Token(checkin_auth_url, client_id, client_secret, refresh_token):
         "client_secret": client_secret,
         "grant_type": "refresh_token",
         "refresh_token": refresh_token,
-        "scope": "openid email profile",
+        "scope": "openid email profile eduperson_entitlement",
     }
 
     curl = requests.post(
         url=checkin_auth_url, auth=(client_id, client_secret), data=payload
     )
     data = curl.json()
-
+    # print(data)
     # Server response
     return data["access_token"]
 
