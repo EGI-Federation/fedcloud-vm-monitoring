@@ -173,11 +173,23 @@ def main():
         print("[.] Reading settings of the resource provider: %s " % provider_name)
         print("%s" % json.dumps(providers[index], indent=4, sort_keys=False))
 
+        # Protocol fix:
+        if (
+            "INFN-CLOUD-BARI" in provider_name
+            or "BIFI" in provider_name
+            or "EODC" in provider_name
+            or "CSTCLOUD-EGI" in provider_name
+            or "GWDG-CLOUD" in provider_name
+        ):
+            protocol = "oidc"
+        else:
+            protocol = "openid"
+
         # Retrieve an OpenStack scoped token
         scoped_token = get_scoped_Token(
             provider_identity,
             provider_project_id,
-            get_unscoped_Token(provider_identity, token),
+            get_unscoped_Token(provider_identity, token, protocol),
         )
 
         # print(scoped_token)
