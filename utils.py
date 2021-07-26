@@ -17,16 +17,19 @@
 
 import configparser
 import json
+import ldap3
 import os
 import urllib
 from datetime import datetime
+from ldap3 import Server, Connection, ALL
 from urllib.request import Request, urlopen, ssl, socket
 from urllib.error import URLError, HTTPError
 
+
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.3"
-__date__ = "$Date: 22/05/2021 09:42:27"
+__version__ = "$Revision: 1.0.4"
+__date__ = "$Date: 21/07/2021 09:42:27"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 
@@ -79,6 +82,7 @@ def highlight(colour, text):
 
 def load_provider_settings(file):
     """ Load cloud providers settings """
+
     filename = "%s/%s" % (os.environ["PWD"], file)
     providers = []
 
@@ -112,21 +116,28 @@ def get_settings():
 
     d = {}
     try:
-        d["os_protocol"] = os.environ["OS_PROTOCOL"]
-        d["os_identity_api_version"] = os.environ["OS_IDENTITY_API_VERSION"]
-        d["os_identity_provider"] = os.environ["OS_IDENTITY_PROVIDER"]
-        d["os_auth_type"] = os.environ["OS_AUTH_TYPE"]
+        # d['os_protocol'] = os.environ['OS_PROTOCOL']
+        # d['os_identity_api_version'] = os.environ['OS_IDENTITY_API_VERSION']
+        # d['os_identity_provider'] = os.environ['OS_IDENTITY_PROVIDER']
+        # d['os_auth_type'] = os.environ['OS_AUTH_TYPE']
 
-        d["checkin_client_id"] = os.environ["CHECKIN_CLIENT_ID"]
-        d["checkin_client_secret"] = os.environ["CHECKIN_CLIENT_SECRET"]
-        d["checkin_refresh_token"] = os.environ["CHECKIN_REFRESH_TOKEN"]
-        d["checkin_auth_url"] = os.environ["CHECKIN_AUTH_URL"]
+        d["CHECKIN_CLIENT_ID"] = os.environ["CHECKIN_CLIENT_ID"]
+        d["CHECKIN_CLIENT_SECRET"] = os.environ["CHECKIN_CLIENT_SECRET"]
+        d["CHECKIN_REFRESH_TOKEN"] = os.environ["CHECKIN_REFRESH_TOKEN"]
+        d["CHECKIN_AUTH_URL"] = os.environ["CHECKIN_AUTH_URL"]
 
         d["PROVIDERS_SETTINGS_FILENAME"] = os.environ["PROVIDERS_SETTINGS_FILENAME"]
         d["MAX_OFFSET"] = os.environ["MAX_OFFSET"]
         d["GOC_DB_URL"] = os.environ["GOC_DB_URL"]
         d["GOC_DB_PATH"] = os.environ["GOC_DB_PATH"]
         d["TENANT_NAME"] = os.environ["TENANT_NAME"]
+
+        d["LDAP_SERVER"] = os.environ["LDAP_SERVER"]
+        d["LDAP_USERNAME"] = os.environ["LDAP_USERNAME"]
+        d["LDAP_PASSWD"] = os.environ["LDAP_PASSWD"]
+        d["LDAP_SEARCH_BASE"] = os.environ["LDAP_SEARCH_BASE"]
+        d["LDAP_SEARCH_FILTER"] = os.environ["LDAP_SEARCH_FILTER"]
+        # d['LDAP_ATTRS'] = os.environ['LDAP_ATTRS']
 
         d["VERBOSE"] = os.environ["VERBOSE"]
 
@@ -170,3 +181,33 @@ def check_SSL_certificate(url, verbose):
                 return "valid"
             else:
                 return "expired"
+
+
+def connect_LDAP(
+    LDAP_server,
+    LDAP_username,
+    LDAP_passwd,
+    LDAP_search_base,
+    LDAP_search_filter,
+    userID,
+):
+    """ Connecting to the EGI LDAP server and fetching users """
+
+    # Create the server ojbect for onnecting the EGI LDAP server
+    server = ldap3.Server(LDAP_server, get_info=ALL)
+
+    # Create a connection object, and bind with the given DN and password.
+    conn = ldap3.Connection(server, LDAP_username, password=LDAP_passwd, auto_bind=True)
+
+    # Perform a search for a pre-defined criteria.
+    entries = conn.search(LDAP_search_base, LDAP_search_filter, attributes=["*"])
+
+    # Print the resulting entries
+    for entry in conn.entries:
+        if userID in entry["voPersonID"]:
+            # print("\n- User: %s" %entry['cn'])
+            # print("- UserID: %s" %entry['voPersonID'])
+            # print("- Mail: %s" %entry['mail'])
+            # print("- CO groups: %s" %entry['isMemberOf'])
+            # print("- Status: %s" %entry['voPersonStatus'])
+            return entry["mail"]

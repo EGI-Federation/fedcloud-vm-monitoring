@@ -66,10 +66,10 @@ Installing setuptools, pip, wheel...done.
 ]$ source venv/bin/activate
 ```
 
-Install the libraries `requests` and `pytz` with pip:
+Install the libraries `requests`, `pytz` and `ldap3` with pip:
 
 ```
-]$ python3 -m pip install requests pytz
+]$ python3 -m pip install requests pytz ldap3
 [..]
 ```
 
@@ -82,17 +82,22 @@ Edit and export the settings:
 
 #!/bin/bash
 
-# General settings
-export OS_PROTOCOL="openid"
-export OS_IDENTITY_API_VERSION=3
-export OS_IDENTITY_PROVIDER="egi.eu"
-export OS_AUTH_TYPE="v3oidcaccesstoken"
-
 # EGI AAI Check-In settings
 export CHECKIN_CLIENT_ID="..."
 export CHECKIN_CLIENT_SECRET="..."
 export CHECKIN_REFRESH_TOKEN="..."
 export CHECKIN_AUTH_URL="https://aai.egi.eu/oidc/token"
+
+# EGI GOC_DB database settings
+export GOC_DB_URL="goc.egi.eu"
+export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
+
+# EGI LDAP server settings
+export LDAP_SERVER="ldaps://ldap.aai-dev.egi.eu"
+export LDAP_PASSWD="..."
+export LDAP_USERNAME="cn=...,dc=ldap,dc=aai-dev,dc=egi,dc=eu"
+export LDAP_SEARCH_BASE="ou=people,dc=ldap,dc=aai-dev,dc=egi,dc=eu"
+export LDAP_SEARCH_FILTER="(isMemberOf=CO:COU:...:members)"
 
 # This configuration file contains the settings of EGI cloud providers to be checked.
 export PROVIDERS_SETTINGS_FILENAME="providers-settings.ini"
@@ -101,10 +106,6 @@ export PROVIDERS_SETTINGS_FILENAME="providers-settings.ini"
 # E.g.: 1 mounth = 30 days * 24h = 720 hours
 # If MAX_OFFSET=-1, all the running VMs in the tenant of the providers will be deleted
 export MAX_OFFSET=720
-
-# EGI GOC database settings
-export GOC_DB_URL="goc.egi.eu"
-export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
 
 # The tenant name to be monitored in the cloud providers.
 export TENANT_NAME="access"
@@ -132,7 +133,7 @@ For each cloud provider, the following settings are provided:
 [PROVIDER HOSTNAME]
 ROC_Name: ROC_NAME
 Sitename: PROVIDER SITENAME
-Name: PROVIDER HOSTNAME
+Hostname: PROVIDER HOSTNAME
 Country: COUNTRY OF THE PROVIDER [COUNTRY ISO CODE]
 Identity: KEYSTONE_URL
 Compute: NOVA_URL
@@ -206,6 +207,8 @@ ProjectID: 999f045cb1ff4684a15ebb338af69460
 
 ```
 ]$ python3 fedcloud-vm-monitoring.py
+Verbose Level = DEBUG
+Max elapsed time = 4320 (in hours) for a running instance in EGI
 
 [.] Reading settings of the provider: api.cloud.ifca.es
 {
@@ -220,36 +223,65 @@ ProjectID: 999f045cb1ff4684a15ebb338af69460
     }
 }
 
-[+] Total VM instance(s) running in the provider = [#3]
-_____________________________________________________________
-- instance name = test
-- instance_id   = https://api.cloud.ifca.es:8774/v2.1/999f045cb1ff4684a15ebb338af69460/servers/044959ce-a3f8-4fe9-bd6f-31b6cc3f6b27
+[+] Total VM instance(s) running in the provider = [#1]
+_________________________________________________________________________________
+- instance name = EGI_CentOS_8-161470352152 [#1]
+- instance_id   = 966d49a2-81ac-4301-9d92-d68c7dfbc75a
+- instance_href = https://api.cloud.ifca.es:8774/v2.1/servers/966d49a2-81ac-4301-9d92-d68c7dfbc75a
 - status        = ACTIVE
-- ip address    = 172.16.8.3
-- image flavor  = m1.small with 1 vCPU cores, 2000 of RAM and 10GB of local disk
-- created at    = 2021-05-24T09:03:28Z
-- elapsed time  = 0.49 (hours)
-- created by    = 025166931789a0f57793a6092726c2ad89387a4cc167e7c63c5d85fc91021d18@egi.eu
+- ip address    = 193.146.75.230
+- image flavor  = cm4.2xlarge with 8 vCPU cores, 15000 of RAM and 30GB of local disk
+- created at    = 2021-03-02T16:45:28Z
+- elapsed time  = 116.71 (days), 3501.29 (hours)
+  WARNING       = User not authorized to perform the requested action: 'identity:get_user'
+- created by    = 5bd063142ec146a1ba93b794eaded9d2
 
 [-] WARNING: The VM instance elapsed time exceed the max offset!
-[-] Deleting of the instance [044959ce-a3f8-4fe9-bd6f-31b6cc3f6b27] in progress ...
+[-] Deleting of the instance [966d49a2-81ac-4301-9d92-d68c7dfbc75a] in progress ...
 Do you want to remove the running VM (y/n) ? y
 [DONE] Server instance successfully removed from the provider.
-_____________________________________________________________
-- instance name = EGI_Ubuntu_20_04-162099572521
-- instance_id   = https://api.cloud.ifca.es:8774/v2.1/999f045cb1ff4684a15ebb338af69460/servers/328e3845-93c0-4d57-bd10-11acfd9c5ee7
-- status        = ACTIVE
-- ip address    = 172.16.8.13
-- image flavor  = cm4.2xlarge with 8 vCPU cores, 15000 of RAM and 30GB of local disk
-- created at    = 2021-05-14T12:35:27Z
-- elapsed time  = 236.97 (hours)
-  WARNING   = User not authorized to perform the requested action: 'identity:get_user'
-- created by    = aba1ce2db1694003879ac987e08c87b1
 
-[-] WARNING: The VM instance elapsed time exceed the max offset!
-[-] Deleting of the instance [328e3845-93c0-4d57-bd10-11acfd9c5ee7] in progress ...
-Do you want to remove the running VM (y/n) ? n
+[.] Reading settings of the resource provider: egiosc.gsi.de
+{
+    "provider": {
+        "compute": "http://egiosc.gsi.de:8774/v2.1",
+        "country": "Germany [DE]",
+        "hostname": "egiosc.gsi.de",
+        "identity": "https://egiosc.gsi.de:5000/v3",
+        "sitename": "GSI-LCG2",
+        "ROC_name": "NGI_DE",
+        "project_id": "1392719e6e4c4bf7ba0fce8c0acbbd22"
+    }
+}
+- No VMs instances found in the resource provider
+
 [..]
+
+[.] Reading settings of the resource provider: bulut.truba.gov.tr
+{
+    "provider": {
+        "compute": "http://bulut.truba.gov.tr:8774/v2.1",
+        "country": "Turkey [TR]",
+        "hostname": "bulut.truba.gov.tr",
+        "identity": "https://bulut.truba.gov.tr:5000/v3",
+        "sitename": "TR-FC1-ULAKBIM",
+        "ROC_name": "NGI_TR",
+        "project_id": "2fa316a05d364de9b5a55ac78a45f8bf"
+    }
+}
+
+[+] Total VM instance(s) running in the resource provider = [#1]
+_________________________________________________________________________________
+- instance name = test [#1]
+- instance_id   = c2c2e450-50d7-4feb-9848-72ec99c3a17b
+- instance_href = http://bulut.truba.gov.tr:8774/v2.1/servers/c2c2e450-50d7-4feb-9848-72ec99c3a17b
+- status        = SHUTOFF
+- ip address    = 172.17.4.207
+- image flavor  = m1.medium with 2 vCPU cores, 2048 of RAM and 40GB of local disk
+- created at    = 2021-04-28T10:07:14Z
+- elapsed time  = 71.34 (days), 2140.34 (hours)
+- created by    = 025166931789a0f57793a6092726c2ad89387a4cc167e7c63c5d85fc91021d18@egi.eu
+- email         = giuseppe.larocca@egi.eu
 ```
 
 ## Useful links

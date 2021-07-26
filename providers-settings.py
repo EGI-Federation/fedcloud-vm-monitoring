@@ -146,16 +146,18 @@ def main():
 
                 # Initialize the OIDC token from the EGI AAI Check-In service.
                 token = get_OIDC_Token(
-                    settings["checkin_auth_url"],
-                    settings["checkin_client_id"],
-                    settings["checkin_client_secret"],
-                    settings["checkin_refresh_token"],
+                    settings["CHECKIN_AUTH_URL"],
+                    settings["CHECKIN_CLIENT_ID"],
+                    settings["CHECKIN_CLIENT_SECRET"],
+                    settings["CHECKIN_REFRESH_TOKEN"],
                 )
                 try:
                     # Retrieve an "unscoped" token from the provider
                     unscoped_token = get_unscoped_Token(os_auth_url, token, protocol)
 
-                    print("- Get the list of projects *supported* by the provider")
+                    print(
+                        "- Get the list of projects *supported* by the resource provider"
+                    )
                     projects = get_projects(os_auth_url, unscoped_token)
                     print(
                         colourise(
@@ -179,7 +181,7 @@ def main():
                             print(
                                 colourise(
                                     "yellow",
-                                    "- Tenant published by the resource provider",
+                                    "- Tenant(s) published by the resource provider",
                                 )
                             )
                             # Retrieve a "scoped" token from the provider

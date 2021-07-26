@@ -19,7 +19,13 @@ import datetime as dt
 import json
 import requests
 import traceback
-from utils import load_provider_settings, colourise, highlight, get_settings
+from utils import (
+    load_provider_settings,
+    colourise,
+    highlight,
+    get_settings,
+    connect_LDAP,
+)
 from pytz import timezone
 from pyGetScopedToken import get_OIDC_Token, get_scoped_Token, get_unscoped_Token
 
@@ -150,14 +156,19 @@ def main():
     # Get the user's settings
     env = get_settings()
     verbose = env["VERBOSE"]
+    offset = env["MAX_OFFSET"]
     print("Verbose Level = %s" % colourise("cyan", verbose))
+    print(
+        "Max elapsed time = %s (in hours) for a running instance in EGI"
+        % colourise("cyan", offset)
+    )
 
     # Initialize the OIDC token from the EGI AAI Check-In service.
     token = get_OIDC_Token(
-        env["checkin_auth_url"],
-        env["checkin_client_id"],
-        env["checkin_client_secret"],
-        env["checkin_refresh_token"],
+        env["CHECKIN_AUTH_URL"],
+        env["CHECKIN_CLIENT_ID"],
+        env["CHECKIN_CLIENT_SECRET"],
+        env["CHECKIN_REFRESH_TOKEN"],
     )
 
     # Loading the configuration settings of the EGI training providers
@@ -170,7 +181,7 @@ def main():
         provider_compute = providers[index]["provider"]["compute"]
         provider_project_id = providers[index]["provider"]["project_id"]
 
-        print("[.] Reading settings of the resource provider: %s " % provider_name)
+        print("\n[.] Reading settings of the resource provider: %s " % provider_name)
         print("%s" % json.dumps(providers[index], indent=4, sort_keys=False))
 
         # Protocol fix:
@@ -204,7 +215,7 @@ def main():
         if len(instances["servers"]) > 0:
             print(
                 "\n[+] Total VM instance(s) running in the resource provider = [#%s]"
-                % len(instances["servers"])
+                % colourise("yellow", len(instances["servers"]))
             )
             if verbose == "DEBUG":
                 print(instances["servers"])
@@ -212,6 +223,7 @@ def main():
                 if instances["servers"][index]["links"]:
                     # Get the instance_id
                     instance_id = instances["servers"][index]["id"]
+                    instance_href = instances["servers"][index]["links"][0]["href"]
 
                     # Get the usage data for the server
                     # diagnostics = get_instance_diagnostics(provider_compute, instance_id, scoped_token)
@@ -223,9 +235,9 @@ def main():
                     )
                     # print("\n%s" %json.dumps(vm_details, indent=4, sort_keys=False))
                     if vm_details:
+                        instance_name = vm_details["server"]["name"]
                         created = vm_details["server"]["created"]
                         status = vm_details["server"]["status"]
-                        instance_name = vm_details["server"]["name"]
 
                         # Retrieve the list of network interfaces of the instance
                         ip_details = get_instance_ip(
@@ -250,9 +262,13 @@ def main():
                             flavor_disk = flavor_details[1]["flavor"]["disk"]
 
                         # Print VM instance metadata
-                        print("_" + "_" * 60)
-                        print("- instance name = %s " % instance_name)
+                        print("_" + "_" * 80)
+                        print(
+                            "- instance name = %s [#%s]"
+                            % (instance_name, colourise("yellow", index + 1))
+                        )
                         print("- instance_id   = %s " % instance_id)
+                        print("- instance_href = %s " % instance_href)
                         if "ACTIVE" in status:
                             color = "green"
                         elif "BUILD" in status:
@@ -273,7 +289,10 @@ def main():
                         created_utc = timezone("UCT").localize(created)
                         time_utc = dt.datetime.now(timezone("UCT"))
                         duration = (time_utc - created_utc).total_seconds() / 3600
-                        print("- elapsed time  = %s (hours)" % format(duration, ".2f"))
+                        print(
+                            "- elapsed time  = %s (days), %s (hours)"
+                            % (format(duration / 30, ".2f"), format(duration, ".2f"))
+                        )
 
                         user_id = vm_details["server"]["user_id"]
                         # Get the (real) user from Keystone
@@ -283,7 +302,33 @@ def main():
 
                         if user_details:
                             username = user_details["user"]["name"]
-                            print("- created by    = %s " % username)
+                            if "eToken" in username:
+                                # Strip robot's DN from the username (if any)
+                                pos = username.index("eToken")
+                                if pos > 0:
+                                    username = username[pos + 7 :]
+                                    print("- created by    = %s " % username)
+                                else:
+                                    print("- created by    = %s " % username)
+                            else:
+                                print("- created by    = %s " % username)
+
+                            # Get the email address querying the LDAP server
+                            email = connect_LDAP(
+                                env["LDAP_SERVER"],
+                                env["LDAP_USERNAME"],
+                                env["LDAP_PASSWD"],
+                                env["LDAP_SEARCH_BASE"],
+                                env["LDAP_SEARCH_FILTER"],
+                                username,
+                            )
+                            if email:
+                                print("- email         = %s" % email)
+                            else:
+                                print(
+                                    "- email         = User not found in the LDAP server, or VO membership has expired"
+                                )
+
                         else:
                             print("- created by    = %s " % user_id)
 
