@@ -43,14 +43,15 @@ def get_running_instances(compute_url, project_id, token):
 
     url = "%s/servers" % compute_url
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
+    data = 0  # in case status_code != 200
 
     curl = requests.get(url=url, headers=headers)
     if curl.status_code == 200:
         data = curl.json()
-    else:
-        # raise RuntimeError("Unable to get running instances!")
-        traceback.print_exc()
-        pass
+    # else:
+    #   raise RuntimeError("Unable to get running instances!")
+    #   traceback.print_exc()
+    #   pass
 
     return data
 
@@ -202,7 +203,6 @@ def main():
             provider_project_id,
             get_unscoped_Token(provider_identity, token, protocol),
         )
-
         # print(scoped_token)
 
         # Get the list of the running servers in the selected provider
@@ -212,7 +212,7 @@ def main():
         # print("\n%s" %json.dumps(instances, indent=4, sort_keys=False))
 
         index = 1
-        if len(instances["servers"]) > 0:
+        if instances and len(instances["servers"]) > 0:
             print(
                 "\n[+] Total VM instance(s) running in the resource provider = [#%s]"
                 % colourise("yellow", len(instances["servers"]))

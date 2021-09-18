@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# General settings
-export OS_PROTOCOL="openid"
-export OS_IDENTITY_API_VERSION=3
-export OS_IDENTITY_PROVIDER="egi.eu"
-export OS_AUTH_TYPE="v3oidcaccesstoken"
-
 # EGI AAI Check-In settings
 export CHECKIN_CLIENT_ID="..."
 export CHECKIN_CLIENT_SECRET="..."
@@ -23,6 +17,13 @@ export MAX_OFFSET=-1
 # EGI GOC database settings 
 export GOC_DB_URL="goc.egi.eu"
 export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
+
+# EGI LDAP server settings
+export LDAP_SERVER="ldaps://ldap.aai-dev.egi.eu"
+export LDAP_PASSWD="...." # vo.access.egi.eu
+export LDAP_USERNAME="cn=vo_access_admin,dc=ldap,dc=aai-dev,dc=egi,dc=eu"
+export LDAP_SEARCH_BASE="ou=people,dc=ldap,dc=aai-dev,dc=egi,dc=eu"
+export LDAP_SEARCH_FILTER="(isMemberOf=CO:COU:vo.access.egi.eu:members)"
 
 # Other settings
 export TENANT_NAME="access"

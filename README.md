@@ -10,6 +10,7 @@ The clients work with OpenStack cloud providers supporting the OIDC protocol.
   libraries is requested
 * Basic knowledge of `virtualenv` is requested
 * Python v3.9+
+* Cloud providers enabling the `"identity:get_user": ""` policy
 
 ## Installation
 
@@ -95,9 +96,9 @@ export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org
 # EGI LDAP server settings
 export LDAP_SERVER="ldaps://ldap.aai-dev.egi.eu"
 export LDAP_PASSWD="..."
-export LDAP_USERNAME="cn=...,dc=ldap,dc=aai-dev,dc=egi,dc=eu"
+xport LDAP_USERNAME="cn=vo_access_admin,dc=ldap,dc=aai-dev,dc=egi,dc=eu"
 export LDAP_SEARCH_BASE="ou=people,dc=ldap,dc=aai-dev,dc=egi,dc=eu"
-export LDAP_SEARCH_FILTER="(isMemberOf=CO:COU:...:members)"
+export LDAP_SEARCH_FILTER="(isMemberOf=CO:COU:vo.access.egi.eu:members)"
 
 # This configuration file contains the settings of EGI cloud providers to be checked.
 export PROVIDERS_SETTINGS_FILENAME="providers-settings.ini"
