@@ -14,9 +14,11 @@ export PROVIDERS_SETTINGS_FILENAME="providers-settings.ini"
 # If MAX_OFFSET=-1, all the running VMs in the tenant of the providers will be deleted
 export MAX_OFFSET=-1
 
-# EGI GOC database settings 
-export GOC_DB_URL="goc.egi.eu"
-export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
+# EGI GOCDB settings 
+# https://goc.egi.eu/gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y
+# https://goc.egi.eu/gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.horizon&monitored=Y
+export GOCDB_URL="goc.egi.eu"
+export GOCDB_ENDPOINTS_PATH="gocdbpi/public/?method=get_service_endpoint&service_type="
 
 # EGI LDAP server settings
 export LDAP_SERVER="ldaps://ldap.aai-dev.egi.eu"

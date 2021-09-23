@@ -28,8 +28,8 @@ from urllib.error import URLError, HTTPError
 
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.4"
-__date__ = "$Date: 21/07/2021 09:42:27"
+__version__ = "$Revision: 1.0.5"
+__date__ = "$Date: 23/09/2021 10:27:27"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 
@@ -103,6 +103,7 @@ def load_provider_settings(file):
                     "country": config.get(section, "Country"),
                     "identity": config.get(section, "Identity"),
                     "compute": config.get(section, "Compute"),
+                    "horizon": config.get(section, "Horizon"),
                     "project_id": config.get(section, "ProjectID"),
                 }
             }
@@ -128,8 +129,10 @@ def get_settings():
 
         d["PROVIDERS_SETTINGS_FILENAME"] = os.environ["PROVIDERS_SETTINGS_FILENAME"]
         d["MAX_OFFSET"] = os.environ["MAX_OFFSET"]
-        d["GOC_DB_URL"] = os.environ["GOC_DB_URL"]
-        d["GOC_DB_PATH"] = os.environ["GOC_DB_PATH"]
+        d["GOCDB_URL"] = os.environ["GOCDB_URL"]
+        d["GOCDB_ENDPOINTS_PATH"] = os.environ["GOCDB_ENDPOINTS_PATH"]
+        # d['GOCDB_NOVA_SERVICE_TYPE_PATH'] = os.environ['GOCDB_NOVA_SERVICE_TYPE_PATH']
+        # d['GOCDB_HORIZON_SERVICE_TYPE_PATH'] = os.environ['GOCDB_HORIZON_SERVICE_TYPE_PATH']
         d["TENANT_NAME"] = os.environ["TENANT_NAME"]
 
         d["LDAP_SERVER"] = os.environ["LDAP_SERVER"]

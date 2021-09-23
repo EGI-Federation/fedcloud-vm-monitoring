@@ -32,8 +32,8 @@ from pyGetScopedToken import get_OIDC_Token, get_scoped_Token, get_unscoped_Toke
 
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.6"
-__date__ = "$Date: 06/06/2021 10:33:17"
+__version__ = "$Revision: 1.0.7"
+__date__ = "$Date: 23/09/2021 12:38:17"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 

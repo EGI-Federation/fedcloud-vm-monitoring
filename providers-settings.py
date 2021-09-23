@@ -34,22 +34,39 @@ from utils import (
 
 __author__ = "Giuseppe LA ROCCA"
 __email__ = "giuseppe.larocca@egi.eu"
-__version__ = "$Revision: 1.0.3"
-__date__ = "$Date: 05/06/2021 09:46:33"
+__version__ = "$Revision: 1.0.4"
+__date__ = "$Date: 23/09/2021 10:276:33"
 __copyright__ = "Copyright (c) 2021 EGI Foundation"
 __license__ = "Apache Licence v2.0"
 
 
-def get_GOCDB_endpoints(goc_db_url, path):
-    """ Retrieve the list of endpoints from the GOC DB """
+def get_GOCDB_endpoints(goc_db_url, path, service_type):
+    """ Retrieve the "service_type" endpoints from the GOCDB 
+        E.g.: service_type = org.openstack.nova, org.openstack.horizon 
+    """
 
-    url = "https://%s/%s" % (goc_db_url, path)
+    url = "https://%s/%s%s&monitored=Y" % (goc_db_url, path, service_type)
     curl = requests.get(url=url)
 
     if curl.status_code == 200:
         root = ET.fromstring(curl.content)
 
     return root
+
+
+def get_horizon_endpoint(goc_db_url, path, service_type, host):
+    """ Retrieve the Horizon OpenStack dashboard of the given hostname """
+
+    dashboard_endpoint = ""
+    endpoints = get_GOCDB_endpoints(goc_db_url, path, service_type)
+
+    for item in endpoints.findall("SERVICE_ENDPOINT"):
+        sitename = item.find("SITENAME").text
+        horizon = item.find("URL").text
+        if sitename in host:
+            dashboard_endpoint = horizon
+
+    return dashboard_endpoint
 
 
 def get_service_catalogue_details(os_auth_url, unscoped_token):
@@ -93,7 +110,9 @@ def main():
 
     # Get endpoints from the EGI GOCDB
     print(colourise("blue", "Fetching the providers endpoints from the EGI GOCDB"))
-    endpoints = get_GOCDB_endpoints(env["GOC_DB_URL"], env["GOC_DB_PATH"])
+    endpoints = get_GOCDB_endpoints(
+        env["GOCDB_URL"], env["GOCDB_ENDPOINTS_PATH"], "org.openstack.nova"
+    )
 
     now = datetime.now()
     now_format = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -113,6 +132,14 @@ def main():
             rocname = item.find("ROC_NAME").text
             sitename = item.find("SITENAME").text
             hostname = item.find("HOSTNAME").text
+            # Get the Horizon dashboard endpoint for the hostname
+            dashboard_endpoint = get_horizon_endpoint(
+                env["GOCDB_URL"],
+                env["GOCDB_ENDPOINTS_PATH"],
+                "org.openstack.horizon",
+                sitename,
+            )
+
             os_auth_url = item.find("URL").text
             gocdb_portal_url = item.find("GOCDB_PORTAL_URL").text
 
@@ -222,6 +249,10 @@ def main():
                             )
                             file.writelines("Identity: %s\n" % os_auth_url)
                             file.writelines("Compute: %s\n" % nova_endpoint)
+                            if dashboard_endpoint:
+                                file.writelines("Horizon: %s\n" % dashboard_endpoint)
+                            else:
+                                file.writelines("Horizon: N/A\n")
                             file.writelines("GOC Portal URL: %s\n" % gocdb_portal_url)
                             file.writelines("# %s\n" % project_name)
                             file.writelines("ProjectID: %s\n" % project_id)
