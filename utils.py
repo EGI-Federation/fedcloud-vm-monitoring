@@ -131,8 +131,6 @@ def get_settings():
         d["MAX_OFFSET"] = os.environ["MAX_OFFSET"]
         d["GOCDB_URL"] = os.environ["GOCDB_URL"]
         d["GOCDB_ENDPOINTS_PATH"] = os.environ["GOCDB_ENDPOINTS_PATH"]
-        # d['GOCDB_NOVA_SERVICE_TYPE_PATH'] = os.environ['GOCDB_NOVA_SERVICE_TYPE_PATH']
-        # d['GOCDB_HORIZON_SERVICE_TYPE_PATH'] = os.environ['GOCDB_HORIZON_SERVICE_TYPE_PATH']
         d["TENANT_NAME"] = os.environ["TENANT_NAME"]
 
         d["LDAP_SERVER"] = os.environ["LDAP_SERVER"]
@@ -140,7 +138,6 @@ def get_settings():
         d["LDAP_PASSWD"] = os.environ["LDAP_PASSWD"]
         d["LDAP_SEARCH_BASE"] = os.environ["LDAP_SEARCH_BASE"]
         d["LDAP_SEARCH_FILTER"] = os.environ["LDAP_SEARCH_FILTER"]
-        # d['LDAP_ATTRS'] = os.environ['LDAP_ATTRS']
 
         d["VERBOSE"] = os.environ["VERBOSE"]
 
