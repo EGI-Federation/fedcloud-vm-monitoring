@@ -22,14 +22,14 @@ them from the [UMD EGI core Trust Anchor Distribution](http://repository.egi.eu/
 
 Once installed, get the location of the requests CA bundle with:
 
-```
+```sh
 python3 -m requests.certs
 ```
 
 If the output of that command is `/etc/ssl/certs/ca-certificates.crt`, you can
 add EGI CAs by executing:
 
-```
+```sh
 cd /usr/local/share/ca-certificates
 for f in /etc/grid-security/certificates/*.pem ; do ln -s $f $(basename $f .pem).crt; done
 update-ca-certificates
@@ -37,7 +37,7 @@ update-ca-certificates
 
 If the output is `/etc/pki/tls/certs/ca-bundle.crt` add the EGI CAs with:
 
-```
+```sh
 cd /etc/pki/ca-trust/source/anchors
 ln -s /etc/grid-security/certificates/*.pem .
 update-ca-trust extract
@@ -46,7 +46,7 @@ update-ca-trust extract
 Otherwise, you are using internal requests bundle, which can be augmented with
 the EGI CAs with:
 
-```
+```sh
 cat /etc/grid-security/certificates/*.pem >> $(python -m requests.certs)
 ```
 
@@ -54,7 +54,7 @@ cat /etc/grid-security/certificates/*.pem >> $(python -m requests.certs)
 
 Use virtualenv to configure the working environment:
 
-```
+```sh
 ]$ virtualenv -p /usr/bin/python3.9 venv
 Running virtualenv with interpreter /usr/bin/python3.9
 Using base prefix '/usr'
@@ -69,7 +69,7 @@ Installing setuptools, pip, wheel...done.
 
 Install the libraries `requests`, `pytz` and `ldap3` with pip:
 
-```
+```sh
 ]$ python3 -m pip install requests pytz ldap3
 [..]
 ```
@@ -78,7 +78,7 @@ Install the libraries `requests`, `pytz` and `ldap3` with pip:
 
 Edit and export the settings:
 
-```
+```sh
 ]$ cat openrc.sh
 
 #!/bin/bash
@@ -130,7 +130,7 @@ of the cloud providers in production status from the EGI GOCDB service.
 
 For each cloud provider, the following settings are provided:
 
-```
+```ini
 [PROVIDER HOSTNAME]
 ROC_Name: ROC_NAME
 Sitename: PROVIDER SITENAME
@@ -148,7 +148,7 @@ ProjectID: PROJECT_ID
 For simple one-off requests, use this library as a drop-in replacement
 for the requests library:
 
-```
+```sh
 ]$ python3 providers-settings.py
 
 Configuring providers settings in progress...
@@ -185,7 +185,7 @@ Saving providers settings [DONE]
 The settings of the cloud providers supporting the `access` tenant are stored in
 the `PROVIDERS_SETTINGS_FILENAME` file:
 
-```
+```sh
 ]$ cat providers-settings.ini
 
 # Settings of the EGI FedCloud providers
@@ -207,7 +207,7 @@ ProjectID: 999f045cb1ff4684a15ebb338af69460
 
 ## Checking long-running VM instances in the EGI Federated Cloud
 
-```
+```sh
 ]$ python3 fedcloud-vm-monitoring.py
 Verbose Level = DEBUG
 Max elapsed time = 4320 (in hours) for a running instance in EGI
@@ -288,5 +288,5 @@ ________________________________________________________________________________
 
 ## Useful links
 
-* https://docs.openstack.org/api-ref/
-* https://docs.openstack.org/keystone/pike/api_curl_examples.html
+* [OpenStack API](https://docs.openstack.org/api-ref/)
+* [OpenStack API examples](https://docs.openstack.org/keystone/pike/api_curl_examples.html)

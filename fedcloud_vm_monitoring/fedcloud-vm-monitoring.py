@@ -39,7 +39,7 @@ __license__ = "Apache Licence v2.0"
 
 
 def get_running_instances(compute_url, project_id, token):
-    """ Get the list of running instances in the provider """
+    """Get the list of running instances in the provider"""
 
     url = "%s/servers" % compute_url
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
@@ -57,7 +57,7 @@ def get_running_instances(compute_url, project_id, token):
 
 
 def get_instance_metadata(compute_url, instance_id, token):
-    """ Retrieve details about the running instance """
+    """Retrieve details about the running instance"""
 
     url = "%s/servers/%s" % (compute_url, instance_id)
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
@@ -69,7 +69,7 @@ def get_instance_metadata(compute_url, instance_id, token):
 
 
 def get_instance_diagnostics(compute_url, instance_id, token):
-    """ Show basic usage data of a running instance """
+    """Show basic usage data of a running instance"""
 
     url = "%s/servers/%s/diagnostics" % (compute_url, instance_id)
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
@@ -82,7 +82,7 @@ def get_instance_diagnostics(compute_url, instance_id, token):
 
 
 def get_instance_ip(compute_url, instance_id, token):
-    """ Retrieve the IPs of the running instance """
+    """Retrieve the IPs of the running instance"""
 
     url = "%s/servers/%s/ips" % (compute_url, instance_id)
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
@@ -96,7 +96,7 @@ def get_instance_ip(compute_url, instance_id, token):
 
 
 def get_flavor(compute_url, flavor_id, token):
-    """ Retrieve the flavor details of the running instance """
+    """Retrieve the flavor details of the running instance"""
 
     url = "%s/flavors/%s" % (compute_url, flavor_id)
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
@@ -111,7 +111,7 @@ def get_flavor(compute_url, flavor_id, token):
 
 
 def get_user(identity_url, user_id, token):
-    """ Retrieve the real user from KeyStone """
+    """Retrieve the real user from KeyStone"""
 
     url = "%s/users/%s" % (identity_url, user_id)
     headers = {"X-Auth-Token": "%s" % token, "Content-type": "application/json"}
@@ -128,7 +128,7 @@ def get_user(identity_url, user_id, token):
 
 
 def delete_instance(compute_url, instance_id, token):
-    """ Remove server instance from the cloud provider """
+    """Remove server instance from the cloud provider"""
 
     try:
         url = "%s/servers/%s" % (compute_url, instance_id)
