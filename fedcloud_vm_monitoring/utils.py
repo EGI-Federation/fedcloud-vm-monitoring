@@ -35,7 +35,7 @@ __license__ = "Apache Licence v2.0"
 
 
 def colourise(colour, text):
-    """ Colourise - colours text in shell. """
+    """Colourise - colours text in shell."""
     """ Returns plain if colour doesn't exist """
 
     if colour == "black":
@@ -58,7 +58,7 @@ def colourise(colour, text):
 
 
 def highlight(colour, text):
-    """ Highlight - highlights text in shell. """
+    """Highlight - highlights text in shell."""
     """ Returns plain if colour doesn't exist. """
 
     if colour == "black":
@@ -81,7 +81,7 @@ def highlight(colour, text):
 
 
 def load_provider_settings(file):
-    """ Load cloud providers settings """
+    """Load cloud providers settings"""
 
     filename = "%s/%s" % (os.environ["PWD"], file)
     providers = []
@@ -113,7 +113,7 @@ def load_provider_settings(file):
 
 
 def get_settings():
-    """ Reading profile settings from env """
+    """Reading profile settings from env"""
 
     d = {}
     try:
@@ -148,14 +148,14 @@ def get_settings():
 
 
 def pretty_hostname(url):
-    """ Parsing of the hostname """
+    """Parsing of the hostname"""
 
     tmp = url.split("/")
     return tmp[0] + "//" + tmp[2] + "/" + tmp[3]
 
 
 def check_SSL_certificate(url, verbose):
-    """ Check SSL certificate expiration date of a server hostname """
+    """Check SSL certificate expiration date of a server hostname"""
 
     hostname = urllib.parse.urlparse(url).hostname
     port = urllib.parse.urlparse(url).port
@@ -191,7 +191,7 @@ def connect_LDAP(
     LDAP_search_filter,
     userID,
 ):
-    """ Connecting to the EGI LDAP server and fetching users """
+    """Connecting to the EGI LDAP server and fetching users"""
 
     # Create the server ojbect for onnecting the EGI LDAP server
     server = ldap3.Server(LDAP_server, get_info=ALL)

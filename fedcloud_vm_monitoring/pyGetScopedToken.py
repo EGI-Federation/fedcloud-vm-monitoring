@@ -29,7 +29,7 @@ __license__ = "Apache Licence v2.0"
 
 
 def get_OIDC_Token(checkin_auth_url, client_id, client_secret, refresh_token):
-    """ Get an OIDC token from the EGI AAI Check-In service"""
+    """Get an OIDC token from the EGI AAI Check-In service"""
 
     # Creating the paylod for the request
     payload = {
@@ -50,7 +50,7 @@ def get_OIDC_Token(checkin_auth_url, client_id, client_secret, refresh_token):
 
 
 def get_unscoped_Token(os_auth_url, access_token, protocol):
-    """ Retrieve an unscoped token from OpenStack Keystone """
+    """Retrieve an unscoped token from OpenStack Keystone"""
 
     if protocol == "openid":
         url = get_keystone_url(
@@ -69,7 +69,7 @@ def get_unscoped_Token(os_auth_url, access_token, protocol):
 
 
 def get_keystone_url(os_auth_url, path):
-    """ Get Keystone URL """
+    """Get Keystone URL"""
 
     url = urlparse(os_auth_url)
     prefix = url.path.rstrip("/")
@@ -82,7 +82,7 @@ def get_keystone_url(os_auth_url, path):
 
 
 def get_scoped_Token(os_auth_url, os_project_id, unscoped_token):
-    """ Get scoped token """
+    """Get scoped token"""
 
     url = get_keystone_url(os_auth_url, "/v3/auth/tokens")
 

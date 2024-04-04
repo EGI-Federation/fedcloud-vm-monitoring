@@ -6,7 +6,8 @@ import click
 from fedcloudclient.sites import list_sites
 
 from fedcloud_vm_monitoring.site_monitor import SiteMonitor
-from fedcloud_vm_monitoring.appdb import AppDB 
+from fedcloud_vm_monitoring.appdb import AppDB
+
 
 @click.command()
 @click.option("--site", help="site name")
@@ -21,10 +22,15 @@ def main(site, vo, token, max_days, delete, show_quotas):
     for s in sites:
         click.secho(f"[.] Checking VO {vo} at {s}", fg="blue", bold=True)
         if not appdb.vo_check(s):
-            click.secho(f"[-] WARNING: VO {vo} is not available at {s} in AppDB", fg="yellow")
+            click.secho(
+                f"[-] WARNING: VO {vo} is not available at {s} in AppDB", fg="yellow"
+            )
         site_monitor = SiteMonitor(s, vo, token, max_days)
         if not site_monitor.vo_check():
-            click.secho(f"[-] WARNING: VO {vo} is not available at {s} in fedcloudclient", fg="yellow")
+            click.secho(
+                f"[-] WARNING: VO {vo} is not available at {s} in fedcloudclient",
+                fg="yellow",
+            )
             continue
         try:
             site_monitor.vm_monitor(delete)
