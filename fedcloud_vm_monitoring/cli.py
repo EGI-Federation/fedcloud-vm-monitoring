@@ -1,22 +1,63 @@
 """Monitor VM instances running in the provider"""
 
-import sys
-
 import click
-from fedcloudclient.sites import list_sites
-
-from fedcloud_vm_monitoring.site_monitor import SiteMonitor
 from fedcloud_vm_monitoring.appdb import AppDB
+from fedcloud_vm_monitoring.site_monitor import SiteMonitor, SiteMonitorException
+from fedcloudclient.sites import list_sites
 
 
 @click.command()
-@click.option("--site", help="site name")
-@click.option("--vo", default="vo.access.egi.eu", help="vo name")
-@click.option("--token", help="access token")
-@click.option("--max-days", default=90, help="max number of days for running instances")
-@click.option("--delete", default=False, help="ask for deletion of VMs")
-@click.option("--show-quotas", default=True, help="show quotas for VO")
-def main(site, vo, token, max_days, delete, show_quotas):
+@click.option("--site", help="Restrict the monitoring to the site provided")
+@click.option("--vo", default="vo.access.egi.eu", help="VO name to monitor")
+@click.option("--token", help="Valid Check-in access token")
+@click.option(
+    "--max-days",
+    default=90,
+    help="Maximum number of days instances can be running for triggering deletion",
+)
+@click.option("--delete", default=False, is_flag=True, help="Ask for deletion of VMs")
+@click.option("--show-quotas", default=True, help="Show quotas for VO")
+@click.option(
+    "--ldap-server",
+    default="ldaps://ldap.aai.egi.eu:636/",
+    help="LDAP server for VO membership",
+)
+@click.option(
+    "--ldap-base-dn",
+    default="dc=vo.access.egi.eu,dc=ldap,dc=aai,dc=egi,dc=eu",
+    help="LDAP base DN",
+)
+@click.option("--ldap-user", help="LDAP user")
+@click.option("--ldap-password", help="LDAP password")
+@click.option(
+    "--ldap-search-filter",
+    default="(isMemberOf=CO:COU:vo.access.egi.eu:members)",
+    help="LDAP search filter",
+)
+def main(
+    site,
+    vo,
+    token,
+    max_days,
+    delete,
+    show_quotas,
+    ldap_server,
+    ldap_base_dn,
+    ldap_user,
+    ldap_password,
+    ldap_search_filter,
+):
+    ldap_config = {}
+    if ldap_user and ldap_password:
+        ldap_config.update(
+            {
+                "server": ldap_server,
+                "username": ldap_user,
+                "password": ldap_password,
+                "base_dn": ldap_base_dn,
+                "search_filter": ldap_search_filter,
+            }
+        )
     sites = [site] if site else list_sites()
     appdb = AppDB(vo)
     for s in sites:
@@ -25,7 +66,7 @@ def main(site, vo, token, max_days, delete, show_quotas):
             click.secho(
                 f"[-] WARNING: VO {vo} is not available at {s} in AppDB", fg="yellow"
             )
-        site_monitor = SiteMonitor(s, vo, token, max_days)
+        site_monitor = SiteMonitor(s, vo, token, max_days, ldap_config)
         if not site_monitor.vo_check():
             click.secho(
                 f"[-] WARNING: VO {vo} is not available at {s} in fedcloudclient",
@@ -34,7 +75,7 @@ def main(site, vo, token, max_days, delete, show_quotas):
             continue
         try:
             site_monitor.vm_monitor(delete)
-        except Exception as e:
+        except SiteMonitorException as e:
             click.echo(" ".join([click.style("ERROR:", fg="red"), str(e)]), err=True)
         if show_quotas:
             click.echo("[+] Quota information:")
@@ -43,7 +84,3 @@ def main(site, vo, token, max_days, delete, show_quotas):
         #       and not attached to any VM for deletion
         # site_monitor.vol_monitor()
         # site_monitor.ip_monitor()
-
-
-if __name__ == "__main__":
-    main()

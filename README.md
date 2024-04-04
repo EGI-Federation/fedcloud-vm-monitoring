@@ -1,292 +1,233 @@
 # fedcloud-vm-monitoring
 
-This repository contains the Python clients to monitor the EGI FedCloud resources
-allocation and removing long-running instances.
-The clients work with OpenStack cloud providers supporting the OIDC protocol.
+This repository contains a Python tool to monitor usage of EGI FedCloud
+providers and remove long-running instances. The clients work with OpenStack
+cloud providers supporting the OIDC protocol.
 
 ## Requirements
 
-* Basic knowledge of the `json`, `requests`, `configparser`, `ldap3` and other basic python
-  libraries is requested
-* Basic knowledge of `virtualenv` is requested
-* Python v3.9+
-* Cloud providers enabling the `"identity:get_user": ""` policy
+- Python v3.9+
+- A Check-in account member of the VOs to be monitored
+- For getting the EGI user identity, cloud providers have to enable the
+  `"identity:get_user"` API call for the user (see
+  [VO auditing](https://docs.egi.eu/providers/cloud-compute/openstack/aai/#vo-auditing)
+  for more information
 
 ## Installation
 
-Make sure that your environment has the EGI CAs properly installed and
-configured for python:
+You can install with `pip` (it is recommended to install in a virtualenv!):
 
-If you don’t have the CA certificates installed in your machine, you can get
-them from the [UMD EGI core Trust Anchor Distribution](http://repository.egi.eu/?category_name=cas)
-
-Once installed, get the location of the requests CA bundle with:
-
-```sh
-python3 -m requests.certs
+```shell
+pip install -U git+https://github.com/EGI-Federation/fedcloud-vm-monitoring.git
 ```
 
-If the output of that command is `/etc/ssl/certs/ca-certificates.crt`, you can
-add EGI CAs by executing:
+Some sites use certificates issued by certificate authorities that are not
+included in the default OS distribution, if you find SSL errors, please
+[install the EGI Core Trust Anchors certificates](https://fedcloudclient.fedcloud.eu/install.html#installing-egi-core-trust-anchor-certificates)
 
-```sh
-cd /usr/local/share/ca-certificates
-for f in /etc/grid-security/certificates/*.pem ; do ln -s $f $(basename $f .pem).crt; done
-update-ca-certificates
+## Running the monitor
+
+For running the tool, you just need a
+[valid Check-in token](https://docs.egi.eu/users/aai/check-in/obtaining-tokens/):
+
+```shell
+fedcloud-vo-monitor --token <your token>
 ```
 
-If the output is `/etc/pki/tls/certs/ca-bundle.crt` add the EGI CAs with:
+You can tune the behavior with the following parameters:
 
-```sh
-cd /etc/pki/ca-trust/source/anchors
-ln -s /etc/grid-security/certificates/*.pem .
-update-ca-trust extract
-```
+- `--site SITE_NAME`: restrict the monitoring to the site provided, otherwise
+  will check all sites available in GOCDB.
+- `--vo VO_NAME`: VO name to monitor, default is `vo.access.egi.eu`.
+- `--delete`: if set, ask for deletion of VMs if they go beyond `max-days`
+- `--max-days INTEGER`: maximum number of days instances can be running before
+  triggering deletion (default 90 days).
+- `--show-quotas BOOLEAN`: whether to show quotas for the VO or not (default:
+  `True`)
 
-Otherwise, you are using internal requests bundle, which can be augmented with
-the EGI CAs with:
+If you have access to
+[Check-in LDAP](https://docs.egi.eu/users/aai/check-in/vos/#ldap) for VO
+membership, you can specify the settings with the following options:
 
-```sh
-cat /etc/grid-security/certificates/*.pem >> $(python -m requests.certs)
-```
+- `--ldap-user USERNAME`
+- `--ldap-password PASSWORD`
 
-## Configuring the environment
+The `ldap-server`, `ldap-base-dn` and `ldap-search-filter`, can further tune the
+usage of LDAP, but should work for most cases without changes.
 
-Use virtualenv to configure the working environment:
+### Sample output
 
-```sh
-]$ virtualenv -p /usr/bin/python3.9 venv
-Running virtualenv with interpreter /usr/bin/python3.9
-Using base prefix '/usr'
-/usr/local/lib/python2.7/dist-packages/virtualenv.py:1047: DeprecationWarning: the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses
-  import imp
-New python executable in /home/larocca/APIs/fedcloud-vm-monitoring/venv/bin/python3.9
-Also creating executable in /home/larocca/APIs/fedcloud-vm-monitoring/venv/bin/python
-Installing setuptools, pip, wheel...done.
+```shell
+$ fedcloud-vo-monitor --token $ACCESS_TOKEN --vo cloud.egi.eu
+[.] Checking VO cloud.egi.eu at 100IT
+[-] WARNING: VO cloud.egi.eu is not available at 100IT in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at 100IT in fedcloudclient
+[.] Checking VO cloud.egi.eu at BIFI
+[-] WARNING: VO cloud.egi.eu is not available at BIFI in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at BIFI in fedcloudclient
+[.] Checking VO cloud.egi.eu at CENI
+[-] WARNING: VO cloud.egi.eu is not available at CENI in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at CENI in fedcloudclient
+[.] Checking VO cloud.egi.eu at CESGA
+[-] WARNING: VO cloud.egi.eu is not available at CESGA in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at CESGA in fedcloudclient
+[.] Checking VO cloud.egi.eu at CESGA-CLOUD
+[-] WARNING: VO cloud.egi.eu is not available at CESGA-CLOUD in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at CESGA-CLOUD in fedcloudclient
+[.] Checking VO cloud.egi.eu at CESNET-MCC
+[-] WARNING: VO cloud.egi.eu is not available at CESNET-MCC in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at CESNET-MCC in fedcloudclient
+[.] Checking VO cloud.egi.eu at CETA-GRID
+[-] WARNING: VO cloud.egi.eu is not available at CETA-GRID in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at CETA-GRID in fedcloudclient
+[.] Checking VO cloud.egi.eu at CLOUDIFIN
+[-] WARNING: VO cloud.egi.eu is not available at CLOUDIFIN in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at CLOUDIFIN in fedcloudclient
+[.] Checking VO cloud.egi.eu at CSTCLOUD-EGI
+[-] WARNING: VO cloud.egi.eu is not available at CSTCLOUD-EGI in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at CSTCLOUD-EGI in fedcloudclient
+[.] Checking VO cloud.egi.eu at CYFRONET-CLOUD
+[-] WARNING: VO cloud.egi.eu is not available at CYFRONET-CLOUD in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at CYFRONET-CLOUD in fedcloudclient
+[.] Checking VO cloud.egi.eu at DESY-CC
+[-] WARNING: VO cloud.egi.eu is not available at DESY-CC in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at DESY-CC in fedcloudclient
+[.] Checking VO cloud.egi.eu at GRNET-OPENSTACK
+[-] WARNING: VO cloud.egi.eu is not available at GRNET-OPENSTACK in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at GRNET-OPENSTACK in fedcloudclient
+[.] Checking VO cloud.egi.eu at GSI-LCG2
+[-] WARNING: VO cloud.egi.eu is not available at GSI-LCG2 in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at GSI-LCG2 in fedcloudclient
+[.] Checking VO cloud.egi.eu at IFCA-LCG2
+[-] WARNING: VO cloud.egi.eu is not available at IFCA-LCG2 in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at IFCA-LCG2 in fedcloudclient
+[.] Checking VO cloud.egi.eu at IISAS-FedCloud
+[+] Total VM instance(s) running in the resource provider = 2
+Getting VMs information  [####################################]  100%
+[+] VM #0  --------------------------------------------------
+    instance name  = cloud-info-backup
+    instance id    = d4e00df3-cbf7-421e-bf9c-66470bb19441
+    status         = ACTIVE
+    ip address     = 192.168.10.170
+    flavor         = m1.large with 4 vCPU cores, 8192 of RAM and 30 GB of local disk
+    created at     = 2024-02-28T08:45:15Z
+    elapsed time   = 40 days, 3:14:07.603224
+    user           = [REDACTED]
+    egi user       = [REDACTED]
+    email          = [REDACTED]
+[+] VM #1  --------------------------------------------------
+    instance name  = dashboard
+    instance id    = 8ef9fcce-19e4-41c6-ab03-d1730a924510
+    status         = ACTIVE
+    ip address     = 192.168.10.69 xxx.xxx.xx.xxx
+    flavor         = m1.medium with 2 vCPU cores, 4096 of RAM and 20 GB of local disk
+    created at     = 2021-12-02T14:53:32Z
+    elapsed time   = 857 days, 21:05:50.603224
+    user           = [REDACTED]
+    egi user       = [REDACTED]
+    email          = [REDACTED]
+[-] WARNING The VM instance elapsed time exceed the max offset!
+[+] Quota information:
+    cores          = 20
+    instances      = 10
+    ram            = 51200
+    floating-ips   = 10
+    secgroup-rules = 100
+[-] WARNING: Less than 3 security groups per instance
+[.] Checking VO cloud.egi.eu at ILIFU-UCT
+[-] WARNING: VO cloud.egi.eu is not available at ILIFU-UCT in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at ILIFU-UCT in fedcloudclient
+[.] Checking VO cloud.egi.eu at IN2P3-IRES
+[-] WARNING: VO cloud.egi.eu is not available at IN2P3-IRES in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at IN2P3-IRES in fedcloudclient
+[.] Checking VO cloud.egi.eu at INFN-CLOUD-BARI
+[-] WARNING: VO cloud.egi.eu is not available at INFN-CLOUD-BARI in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at INFN-CLOUD-BARI in fedcloudclient
+[.] Checking VO cloud.egi.eu at INFN-CLOUD-CNAF
+[-] WARNING: VO cloud.egi.eu is not available at INFN-CLOUD-CNAF in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at INFN-CLOUD-CNAF in fedcloudclient
+[.] Checking VO cloud.egi.eu at NCG-INGRID-PT
+[-] WARNING: VO cloud.egi.eu is not available at NCG-INGRID-PT in AppDB
+[+] Total VM instance(s) running in the resource provider = 4
+Getting VMs information  [------------------------------------]    0%WARNING: Unable to get user list: The request you have made requires authentication. (HTTP 401) (Request-ID: req-5ac539f1-7869-4fd8-9483-8b9eb704d725)
 
-]$ source venv/bin/activate
-```
-
-Install the libraries `requests`, `pytz` and `ldap3` with pip:
-
-```sh
-]$ python3 -m pip install requests pytz ldap3
-[..]
-```
-
-## Configure settings
-
-Edit and export the settings:
-
-```sh
-]$ cat openrc.sh
-
-#!/bin/bash
-
-# EGI AAI Check-In settings
-export CHECKIN_CLIENT_ID="..."
-export CHECKIN_CLIENT_SECRET="..."
-export CHECKIN_REFRESH_TOKEN="..."
-export CHECKIN_AUTH_URL="https://aai.egi.eu/oidc/token"
-
-# EGI GOC_DB database settings
-export GOC_DB_URL="goc.egi.eu"
-export GOC_DB_PATH="gocdbpi/public/?method=get_service_endpoint&service_type=org.openstack.nova&monitored=Y"
-
-# EGI LDAP server settings
-export LDAP_SERVER="ldaps://ldap.aai-dev.egi.eu"
-export LDAP_PASSWD="..."
-xport LDAP_USERNAME="cn=vo_access_admin,dc=ldap,dc=aai-dev,dc=egi,dc=eu"
-export LDAP_SEARCH_BASE="ou=people,dc=ldap,dc=aai-dev,dc=egi,dc=eu"
-export LDAP_SEARCH_FILTER="(isMemberOf=CO:COU:vo.access.egi.eu:members)"
-
-# This configuration file contains the settings of EGI cloud providers to be checked.
-export PROVIDERS_SETTINGS_FILENAME="providers-settings.ini"
-
-# Set the max elapsed time (in hours) for a running instance in the EGI FedCloud infrastructure
-# E.g.: 1 mounth = 30 days * 24h = 720 hours
-# If MAX_OFFSET=-1, all the running VMs in the tenant of the providers will be deleted
-export MAX_OFFSET=720
-
-# The tenant name to be monitored in the cloud providers.
-export TENANT_NAME="access"
-
-# Enable verbose logging
-# VERBOSE=INFO, no verbose logging is OFF
-# VERBOSE=DEBUG, verbose logging is ON
-export VERBOSE=DEBUG
-
-# Sourcing the env. variables
-]$ . openrc.sh
-```
-
-## Configure the providers setting
-
-Create a list of cloud providers to be monitored with the
-`providers-settings.py` python client.
-
-This list is generated harvesting the indentity endpoints
-of the cloud providers in production status from the EGI GOCDB service.
-
-For each cloud provider, the following settings are provided:
-
-```ini
-[PROVIDER HOSTNAME]
-ROC_Name: ROC_NAME
-Sitename: PROVIDER SITENAME
-Hostname: PROVIDER HOSTNAME
-Country: COUNTRY OF THE PROVIDER [COUNTRY ISO CODE]
-Identity: KEYSTONE_URL
-Compute: NOVA_URL
-Dashboard: HORIZON_URL
-GOC Portal URL: ENTRY IN THE EGI GOCDB
-ProjectID: PROJECT_ID
-```
-
-## Usage
-
-For simple one-off requests, use this library as a drop-in replacement
-for the requests library:
-
-```sh
-]$ python3 providers-settings.py
-
-Configuring providers settings in progress...
-This operation may take time. Please wait!
-Fetching the providers endpoints from the EGI GOCDB
-
-- Fetching metadata from IFCA-LCG2
-- The SSL host certificate of the server is valid
-
-- Get the list of projects *supported* by the provider
-- No.7 tenant(s) supported by the resource provider: IFCA-LCG2
-True VO:vo.nextgeoss.eu
-True VO:acc-comp.egi.eu
-False VO:vo.mrilab.es
-True VO:openrisknet.eu
-True VO:vo.access.egi.eu
-True VO:enmr.eu
-True VO:training.egi.eu
-- Tenant published by the resource provider.
-
-- Fetching metadata from IN2P3-IRES
-- The SSL host certificate of the server is valid
-
-- Get the list of projects *supported* by the provider
-- No.3 tenant(s) supported by the resource provider: IN2P3-IRES
-True EGI_biomed
-True EGI_access
-True EGI_FCTF
-
-[..]
-Saving providers settings [DONE]
-```
-
-The settings of the cloud providers supporting the `access` tenant are stored in
-the `PROVIDERS_SETTINGS_FILENAME` file:
-
-```sh
-]$ cat providers-settings.ini
-
-# Settings of the EGI FedCloud providers
-# Last update: 29/04/2021 16:36:19
-#
-
-[IFCA-LCG2]
-ROC_Name: NGI_IBERGRID
-Sitename: IFCA-LCG2
-Country: Spain [ES]
-Identity: https://api.cloud.ifca.es:5000/v3/
-Compute: https://api.cloud.ifca.es:8774/v2.1
-GOC Portal URL: https://goc.egi.eu/portal/index.php?Page_Type=Service&id=7513
-# VO:vo.access.egi.eu
-ProjectID: 999f045cb1ff4684a15ebb338af69460
-
-[..]
-```
-
-## Checking long-running VM instances in the EGI Federated Cloud
-
-```sh
-]$ python3 fedcloud-vm-monitoring.py
-Verbose Level = DEBUG
-Max elapsed time = 4320 (in hours) for a running instance in EGI
-
-[.] Reading settings of the provider: api.cloud.ifca.es
-{
-    "provider": {
-        "sitename": "IFCA-LCG2",
-        "identity": "https://api.cloud.ifca.es:5000/v3/",
-        "hostname": "api.cloud.ifca.es",
-        "ROC_name": "NGI_IBERGRID",
-        "country": "Spain [ES]",
-        "compute": "https://api.cloud.ifca.es:8774/v2.1",
-        "project_id": "999f045cb1ff4684a15ebb338af69460"
-    }
-}
-
-[+] Total VM instance(s) running in the provider = [#1]
-_________________________________________________________________________________
-- instance name = EGI_CentOS_8-161470352152 [#1]
-- instance_id   = 966d49a2-81ac-4301-9d92-d68c7dfbc75a
-- instance_href = https://api.cloud.ifca.es:8774/v2.1/servers/966d49a2-81ac-4301-9d92-d68c7dfbc75a
-- status        = ACTIVE
-- ip address    = 193.146.75.230
-- image flavor  = cm4.2xlarge with 8 vCPU cores, 15000 of RAM and 30GB of local disk
-- created at    = 2021-03-02T16:45:28Z
-- elapsed time  = 116.71 (days), 3501.29 (hours)
-  WARNING       = User not authorized to perform the requested action: 'identity:get_user'
-- created by    = 5bd063142ec146a1ba93b794eaded9d2
-
-[-] WARNING: The VM instance elapsed time exceed the max offset!
-[-] Deleting of the instance [966d49a2-81ac-4301-9d92-d68c7dfbc75a] in progress ...
-Do you want to remove the running VM (y/n) ? y
-[DONE] Server instance successfully removed from the provider.
-
-[.] Reading settings of the resource provider: egiosc.gsi.de
-{
-    "provider": {
-        "compute": "http://egiosc.gsi.de:8774/v2.1",
-        "country": "Germany [DE]",
-        "hostname": "egiosc.gsi.de",
-        "identity": "https://egiosc.gsi.de:5000/v3",
-        "sitename": "GSI-LCG2",
-        "ROC_name": "NGI_DE",
-        "project_id": "1392719e6e4c4bf7ba0fce8c0acbbd22"
-    }
-}
-- No VMs instances found in the resource provider
-
-[..]
-
-[.] Reading settings of the resource provider: bulut.truba.gov.tr
-{
-    "provider": {
-        "compute": "http://bulut.truba.gov.tr:8774/v2.1",
-        "country": "Turkey [TR]",
-        "hostname": "bulut.truba.gov.tr",
-        "identity": "https://bulut.truba.gov.tr:5000/v3",
-        "sitename": "TR-FC1-ULAKBIM",
-        "ROC_name": "NGI_TR",
-        "project_id": "2fa316a05d364de9b5a55ac78a45f8bf"
-    }
-}
-
-[+] Total VM instance(s) running in the resource provider = [#1]
-_________________________________________________________________________________
-- instance name = test [#1]
-- instance_id   = c2c2e450-50d7-4feb-9848-72ec99c3a17b
-- instance_href = http://bulut.truba.gov.tr:8774/v2.1/servers/c2c2e450-50d7-4feb-9848-72ec99c3a17b
-- status        = SHUTOFF
-- ip address    = 172.17.4.207
-- image flavor  = m1.medium with 2 vCPU cores, 2048 of RAM and 40GB of local disk
-- created at    = 2021-04-28T10:07:14Z
-- elapsed time  = 71.34 (days), 2140.34 (hours)
-- created by    = 025166931789a0f57793a6092726c2ad89387a4cc167e7c63c5d85fc91021d18@egi.eu
-- email         = giuseppe.larocca@egi.eu
+Getting VMs information  [####################################]  100%
+[+] VM #0  --------------------------------------------------
+    instance name  = test
+    instance id    = d2431967-a519-47e4-8d8c-209727840233
+    status         = ACTIVE
+    ip address     = 192.168.1.233
+    flavor         = svc1.m with 2 vCPU cores, 4096 of RAM and 40 GB of local disk
+    created at     = 2024-02-29T09:43:01Z
+    elapsed time   = 39 days, 2:17:01.266584
+    user           = [REDACTED]
+[+] VM #1  --------------------------------------------------
+    instance name  = cloud-info
+    instance id    = 9f8c17b4-5503-42ac-af3d-6ed0c9dea9c7
+    status         = ACTIVE
+    ip address     = 192.168.1.3
+    flavor         = svc1.m with 2 vCPU cores, 4096 of RAM and 40 GB of local disk
+    created at     = 2024-02-28T14:39:08Z
+    elapsed time   = 39 days, 21:20:54.266584
+    user           = [REDACTED]
+[+] VM #2  --------------------------------------------------
+    instance name  = atrope
+    instance id    = d6815b91-599d-4c6a-8d55-a38243148838
+    status         = ACTIVE
+    ip address     = 192.168.1.250 xxx.xxx.xxx.xxx
+    flavor         = svc2.l with 8 vCPU cores, 8192 of RAM and 40 GB of local disk
+    created at     = 2022-08-31T07:17:18Z
+    elapsed time   = 586 days, 4:42:44.266584
+    user           = [REDACTED]
+[-] WARNING The VM instance elapsed time exceed the max offset!
+[+] VM #3  --------------------------------------------------
+    instance name  = nsupdate
+    instance id    = 045ec1e7-b47a-4f18-9c9f-06cb30803955
+    status         = ACTIVE
+    ip address     = 192.168.1.71 xxx.xxx.xxx.xxx
+    flavor         = svc2.m with 4 vCPU cores, 4096 of RAM and 40 GB of local disk
+    created at     = 2020-11-13T09:01:32Z
+    elapsed time   = 1242 days, 2:58:30.266584
+    user           = [REDACTED]
+[-] WARNING The VM instance elapsed time exceed the max offset!
+[+] Quota information:
+    ram            = 65536
+    instances      = 10
+    cores          = 24
+    floating-ips   = 2
+    secgroup-rules = 100
+[-] WARNING: Less than 3 security groups per instance
+[-] WARNING: Less than 1 floating IPs per instance
+[.] Checking VO cloud.egi.eu at SCAI
+[-] WARNING: VO cloud.egi.eu is not available at SCAI in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at SCAI in fedcloudclient
+[.] Checking VO cloud.egi.eu at TR-FC1-ULAKBIM
+[-] WARNING: VO cloud.egi.eu is not available at TR-FC1-ULAKBIM in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at TR-FC1-ULAKBIM in fedcloudclient
+[.] Checking VO cloud.egi.eu at UA-BITP
+[-] WARNING: VO cloud.egi.eu is not available at UA-BITP in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at UA-BITP in fedcloudclient
+[.] Checking VO cloud.egi.eu at UNIV-LILLE
+[-] WARNING: VO cloud.egi.eu is not available at UNIV-LILLE in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at UNIV-LILLE in fedcloudclient
+[.] Checking VO cloud.egi.eu at UPV-GRyCAP
+[-] WARNING: VO cloud.egi.eu is not available at UPV-GRyCAP in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at UPV-GRyCAP in fedcloudclient
+[.] Checking VO cloud.egi.eu at WALTON-CLOUD
+[-] WARNING: VO cloud.egi.eu is not available at WALTON-CLOUD in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at WALTON-CLOUD in fedcloudclient
+[.] Checking VO cloud.egi.eu at fedcloud.srce.hr
+[-] WARNING: VO cloud.egi.eu is not available at fedcloud.srce.hr in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at fedcloud.srce.hr in fedcloudclient
+[.] Checking VO cloud.egi.eu at EODC
+[-] WARNING: VO cloud.egi.eu is not available at EODC in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at EODC in fedcloudclient
+[.] Checking VO cloud.egi.eu at ELKH-CLOUD
+[-] WARNING: VO cloud.egi.eu is not available at ELKH-CLOUD in AppDB
+[-] WARNING: VO cloud.egi.eu is not available at ELKH-CLOUD in fedcloudclient
 ```
 
 ## Useful links
 
-* [OpenStack API](https://docs.openstack.org/api-ref/)
-* [OpenStack API examples](https://docs.openstack.org/keystone/pike/api_curl_examples.html)
+- [OpenStack API](https://docs.openstack.org/api-ref/)
+- [OpenStack API examples](https://docs.openstack.org/keystone/pike/api_curl_examples.html)
