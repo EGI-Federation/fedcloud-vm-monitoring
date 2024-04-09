@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fedcloud_vm_monitoring"
+version = "0.0.2"
+description = "Monitoring fedcloud VMs and sites"
+authors = [
+  { name = "Giuseppe La Rocca", email = "giuseppe.larocca@egi.eu" },
+  { name = "Enol Fernandez", email = "enol.fernandez@egi.eu" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache License v2.0",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.10"
+dynamic = ["dependencies"]
+
+[project.scripts]
+fedcloud-vo-monitor = "fedcloud_vm_monitoring.cli:main"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
