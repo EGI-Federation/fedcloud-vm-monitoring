@@ -5,10 +5,10 @@ from datetime import datetime, timezone
 
 import click
 import ldap3
-from ldap3.core.exceptions import LDAPException
 from dateutil.parser import parse
 from fedcloudclient.openstack import fedcloud_openstack
 from fedcloudclient.sites import find_endpoint_and_project_id
+from ldap3.core.exceptions import LDAPException
 
 
 class SiteMonitorException(Exception):
@@ -107,8 +107,7 @@ class SiteMonitor:
         if not self.user_emails:
             try:
                 # get the emails
-                server = ldap3.Server(self.ldap_config["server"],
-                                      get_info=ldap3.ALL)
+                server = ldap3.Server(self.ldap_config["server"], get_info=ldap3.ALL)
                 conn = ldap3.Connection(
                     server,
                     self.ldap_config["username"],
@@ -123,7 +122,7 @@ class SiteMonitor:
                 for entry in conn.entries:
                     self.user_emails[entry["voPersonID"].value] = entry["mail"].value
             except LDAPException as e:
-                click.secho("WARNING: LDAP error: {e}", fg="yellow")
+                click.secho(f"WARNING: LDAP error: {e}", fg="yellow")
         if egi_user not in self.user_emails:
             click.secho(
                 f"WARNING: user {egi_user} not found in the LDAP server, "

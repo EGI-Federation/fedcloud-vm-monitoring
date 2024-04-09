@@ -47,11 +47,6 @@ def main(
     ldap_password,
     ldap_search_filter,
 ):
-
-    import logging
-    logging.basicConfig(level=logging.CRITICAL)
-    from ldap3.utils.log import set_library_log_activation_level
-    set_library_log_activation_level(logging.CRITICAL)
     ldap_config = {}
     if ldap_user and ldap_password:
         ldap_config.update(
