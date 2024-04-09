@@ -7,6 +7,8 @@ Ideally, there is an existing issue which the PR address.
 
 <!-- Describe in plain English what this PR does -->
 
-----
+---
+
 <!-- Add the related issue here, e.g. #6 -->
+
 **Related issue :**

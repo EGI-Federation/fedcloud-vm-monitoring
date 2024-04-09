@@ -12,7 +12,7 @@ Dealing with issues:
 
 # Short Description of the issue
 
-<!-- 
+<!--
 Please provide a plain-language description of what you would like to report.
 By using simple, concise language, you can help the maintainers understand the
 issue and context, and thereby help them prioritise it.
