@@ -3,13 +3,15 @@
 import click
 from fedcloud_vm_monitoring.appdb import AppDB
 from fedcloud_vm_monitoring.site_monitor import SiteMonitor, SiteMonitorException
+from fedcloudclient.decorators import oidc_params
 from fedcloudclient.sites import list_sites
 
 
+
 @click.command()
+@oidc_params
 @click.option("--site", help="Restrict the monitoring to the site provided")
 @click.option("--vo", default="vo.access.egi.eu", help="VO name to monitor")
-@click.option("--token", help="Valid Check-in access token")
 @click.option(
     "--max-days",
     default=90,
@@ -35,9 +37,9 @@ from fedcloudclient.sites import list_sites
     help="LDAP search filter",
 )
 def main(
+    access_token,
     site,
     vo,
-    token,
     max_days,
     delete,
     show_quotas,
@@ -66,7 +68,7 @@ def main(
             click.secho(
                 f"[-] WARNING: VO {vo} is not available at {s} in AppDB", fg="yellow"
             )
-        site_monitor = SiteMonitor(s, vo, token, max_days, ldap_config)
+        site_monitor = SiteMonitor(s, vo, access_token, max_days, ldap_config)
         if not site_monitor.vo_check():
             click.secho(
                 f"[-] WARNING: VO {vo} is not available at {s} in fedcloudclient",
