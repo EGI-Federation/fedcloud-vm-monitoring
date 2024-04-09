@@ -124,12 +124,7 @@ class SiteMonitor:
             except LDAPException as e:
                 click.secho(f"WARNING: LDAP error: {e}", fg="yellow")
         if egi_user not in self.user_emails:
-            click.secho(
-                f"WARNING: user {egi_user} not found in the LDAP server, "
-                "or VO membership has expired",
-                fg="yellow",
-            )
-            return ""
+            return f"{egi_user} not found in LDAP, has VO membership expired?"
         return self.user_emails[egi_user]
 
     def process_vm(self, vm):
