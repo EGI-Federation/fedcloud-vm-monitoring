@@ -55,19 +55,17 @@ class SiteMonitor:
                 command = ("user", "list")
                 all_users = self._run_command(command)
             except SiteMonitorException:
-                # this didn't work but it's ok
-                pass
-            try:
-                # trick fedcloudclient to give us what we need
-                command = ("token", "issue")
-                token = self._run_command(command, scoped=False)
-                command = ("user", "show", token["user_id"])
-                my_user = self._run_command(command, scoped=True)
-                # now we have the domain, can get all users
-                command = ("user", "list", "--os-domain-id", my_user["domain_id"])
-                all_users = self._run_command(command, scoped=False)
-            except SiteMonitorException as e:
-                click.secho(f"WARNING: Unable to get user list: {e}", fg="yellow")
+                try:
+                    # trick fedcloudclient to give us what we need
+                    command = ("token", "issue")
+                    token = self._run_command(command, scoped=False)
+                    command = ("user", "show", token["user_id"])
+                    my_user = self._run_command(command, scoped=True)
+                    # now we have the domain, can get all users
+                    command = ("user", "list", "--os-domain-id", my_user["domain_id"])
+                    all_users = self._run_command(command, scoped=False)
+                except SiteMonitorException as e:
+                    click.secho(f"WARNING: Unable to get user list: {e}", fg="yellow")
             for user in all_users:
                 self.users[user["ID"]] = user
         return self.users[user_id]
