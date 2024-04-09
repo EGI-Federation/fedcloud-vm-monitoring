@@ -7,33 +7,52 @@ from fedcloudclient.decorators import oidc_params
 from fedcloudclient.sites import list_sites
 
 
-
 @click.command()
 @oidc_params
 @click.option("--site", help="Restrict the monitoring to the site provided")
-@click.option("--vo", default="vo.access.egi.eu", help="VO name to monitor")
+@click.option(
+    "--vo",
+    default="vo.access.egi.eu",
+    help="VO name to monitor",
+    show_default=True,
+)
 @click.option(
     "--max-days",
     default=90,
+    show_default=True,
     help="Maximum number of days instances can be running for triggering deletion",
 )
-@click.option("--delete", default=False, is_flag=True, help="Ask for deletion of VMs")
-@click.option("--show-quotas", default=True, help="Show quotas for VO")
+@click.option(
+    "--delete",
+    default=False,
+    is_flag=True,
+    help="Ask for deletion of VMs",
+    show_default=True,
+)
+@click.option(
+    "--show-quotas",
+    default=True,
+    help="Show quotas for VO",
+    show_default=True,
+)
 @click.option(
     "--ldap-server",
     default="ldaps://ldap.aai.egi.eu:636",
     help="LDAP server for VO membership",
+    show_default=True,
 )
 @click.option(
     "--ldap-base-dn",
     default="ou=people,dc=ldap,dc=aai,dc=egi,dc=eu",
     help="LDAP base DN",
+    show_default=True,
 )
 @click.option("--ldap-user", help="LDAP user")
 @click.option("--ldap-password", help="LDAP password")
 @click.option(
     "--ldap-search-filter",
     default="(isMemberOf=CO:COU:vo.access.egi.eu:members)",
+    show_default=True,
     help="LDAP search filter",
 )
 def main(
