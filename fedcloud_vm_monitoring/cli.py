@@ -19,12 +19,12 @@ from fedcloudclient.sites import list_sites
 @click.option("--show-quotas", default=True, help="Show quotas for VO")
 @click.option(
     "--ldap-server",
-    default="ldaps://ldap.aai.egi.eu:636/",
+    default="ldaps://ldap.aai.egi.eu:636",
     help="LDAP server for VO membership",
 )
 @click.option(
     "--ldap-base-dn",
-    default="dc=vo.access.egi.eu,dc=ldap,dc=aai,dc=egi,dc=eu",
+    default="ou=people,dc=ldap,dc=aai,dc=egi,dc=eu",
     help="LDAP base DN",
 )
 @click.option("--ldap-user", help="LDAP user")
@@ -47,6 +47,11 @@ def main(
     ldap_password,
     ldap_search_filter,
 ):
+
+    import logging
+    logging.basicConfig(level=logging.CRITICAL)
+    from ldap3.utils.log import set_library_log_activation_level
+    set_library_log_activation_level(logging.CRITICAL)
     ldap_config = {}
     if ldap_user and ldap_password:
         ldap_config.update(

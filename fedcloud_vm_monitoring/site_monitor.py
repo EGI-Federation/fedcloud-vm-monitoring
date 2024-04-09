@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 import click
 import ldap3
+from ldap3.core.exceptions import LDAPException
 from dateutil.parser import parse
 from fedcloudclient.openstack import fedcloud_openstack
 from fedcloudclient.sites import find_endpoint_and_project_id
@@ -50,6 +51,13 @@ class SiteMonitor:
     def get_user(self, user_id):
         if not self.users:
             all_users = []
+            try:
+                command = ("user", "list")
+                all_users = self._run_command(command)
+            except SiteMonitorException as e:
+                click.secho(f"WARNING: Unable to get user list: {e}", fg="yellow")
+                # this didn't work but it's ok
+                pass
             try:
                 # trick fedcloudclient to give us what we need
                 command = ("token", "issue")
@@ -97,28 +105,33 @@ class SiteMonitor:
             return ""
         # TODO: this is untested code
         if not self.user_emails:
-            # get the emails
-            server = ldap3.Server(self.ldap_config["server"], get_info=ldap3.ALL)
-            conn = ldap3.Connection(
-                server,
-                self.ldap_config["username"],
-                password=self.ldap_config["password"],
-                auto_bind=True,
-            )
-            entries = conn.search(
-                self.ldap_config["base_dn"],
-                self.ldap_config["search_filter"],
-                attributes=["*"],
-            )
-            for entry in entries:
-                self.user_emails[entry["voPersonID"]] = entry["mail"]
+            try:
+                # get the emails
+                server = ldap3.Server(self.ldap_config["server"],
+                                      get_info=ldap3.ALL)
+                conn = ldap3.Connection(
+                    server,
+                    self.ldap_config["username"],
+                    password=self.ldap_config["password"],
+                    auto_bind=True,
+                )
+                conn.search(
+                    self.ldap_config["base_dn"],
+                    self.ldap_config["search_filter"],
+                    attributes=["*"],
+                )
+                for entry in conn.entries:
+                    self.user_emails[entry["voPersonID"].value] = entry["mail"].value
+            except LDAPException as e:
+                click.secho("WARNING: LDAP error: {e}", fg="yellow")
         if egi_user not in self.user_emails:
             click.secho(
-                "WARNING: user {egi_user} not found in the LDAP server, "
+                f"WARNING: user {egi_user} not found in the LDAP server, "
                 "or VO membership has expired",
                 fg="yellow",
             )
-        return ""
+            return ""
+        return self.user_emails[egi_user]
 
     def process_vm(self, vm):
         vm_info = self.get_vm(vm)
@@ -139,7 +152,7 @@ class SiteMonitor:
                 (
                     "flavor",
                     f"{flv['Name']} with {flv['VCPUs']} vCPU cores, {flv['RAM']} "
-                    "of RAM and {flv['Disk']} GB of local disk",
+                    f"of RAM and {flv['Disk']} GB of local disk",
                 )
             )
         output.append(("created at", vm_info["created_at"]))
