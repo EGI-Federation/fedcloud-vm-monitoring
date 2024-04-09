@@ -54,8 +54,7 @@ class SiteMonitor:
             try:
                 command = ("user", "list")
                 all_users = self._run_command(command)
-            except SiteMonitorException as e:
-                click.secho(f"WARNING: Unable to get user list: {e}", fg="yellow")
+            except SiteMonitorException:
                 # this didn't work but it's ok
                 pass
             try:
