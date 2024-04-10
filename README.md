@@ -28,10 +28,12 @@ included in the default OS distribution, if you find SSL errors, please
 ## Running the monitor
 
 For running the tool, you just need a
-[valid Check-in token](https://docs.egi.eu/users/aai/check-in/obtaining-tokens/):
+[valid Check-in token](https://docs.egi.eu/users/aai/check-in/obtaining-tokens/),
+the tool leverages
+[FedCloudClient Authentication](https://fedcloudclient.fedcloud.eu/usage.html#authentication):
 
 ```shell
-fedcloud-vo-monitor --token <your token>
+fedcloud-vo-monitor
 ```
 
 You can tune the behavior with the following parameters:
@@ -58,7 +60,7 @@ usage of LDAP, but should work for most cases without changes.
 ### Sample output
 
 ```shell
-$ fedcloud-vo-monitor --token $ACCESS_TOKEN --vo cloud.egi.eu
+$ fedcloud-vo-monitor --vo cloud.egi.eu
 [.] Checking VO cloud.egi.eu at 100IT
 [-] WARNING: VO cloud.egi.eu is not available at 100IT in AppDB
 [-] WARNING: VO cloud.egi.eu is not available at 100IT in fedcloudclient
