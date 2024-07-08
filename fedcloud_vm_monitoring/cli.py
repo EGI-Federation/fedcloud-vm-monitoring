@@ -5,7 +5,6 @@ from fedcloud_vm_monitoring.appdb import AppDB
 from fedcloud_vm_monitoring.site_monitor import SiteMonitor, SiteMonitorException
 from fedcloudclient.decorators import oidc_params
 from fedcloudclient.sites import list_sites
-from fedcloudclient.sites import find_endpoint_and_project_id
 
 
 @click.command()
