@@ -214,7 +214,7 @@ class SiteMonitor:
         for r in quota:
             if r["Resource"] in resources:
                 if r["Resource"] == "ram":
-                    quota_info[r["Resource"] + " (GB)"] = int(r["Limit"]/1024)
+                    quota_info[r["Resource"] + " (GB)"] = int(r["Limit"] / 1024)
                 else:
                     quota_info[r["Resource"]] = r["Limit"]
         for k, v in quota_info.items():
