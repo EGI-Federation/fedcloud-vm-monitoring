@@ -142,8 +142,8 @@ class SiteMonitor:
             output.append(
                 (
                     "flavor",
-                    f"{flv['Name']} with {flv['VCPUs']} vCPU cores, {flv['RAM']} "
-                    f"of RAM and {flv['Disk']} GB of local disk",
+                    f"{flv['Name']} with {flv['VCPUs']} vCPU cores, {int(flv['RAM']/1024)} "
+                    f"GB of RAM and {flv['Disk']} GB of local disk",
                 )
             )
         output.append(("created at", vm_info["created_at"]))
@@ -213,13 +213,16 @@ class SiteMonitor:
         quota_info = {}
         for r in quota:
             if r["Resource"] in resources:
-                quota_info[r["Resource"]] = r["Limit"]
+                if r["Resource"] == "ram":
+                    quota_info[r["Resource"] + " (GB)"] = int(r["Limit"] / 1024)
+                else:
+                    quota_info[r["Resource"]] = r["Limit"]
         for k, v in quota_info.items():
             click.echo(f"    {k:<14} = {v}")
         # checks on quota
         if quota_info.get("ram", 1) / quota_info.get("cpu", 1) < self.min_ram_cpu_ratio:
             click.secho(
-                f"[-] WARNING: Less than {self.min_ram_cpu_ratio} RAM per available CPU",
+                f"[-] WARNING: Less than {int(self.min_ram_cpu_ratio/1024)} GB RAM per available CPU",
                 fg="yellow",
             )
         if (
