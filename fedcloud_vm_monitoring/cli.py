@@ -5,6 +5,7 @@ from fedcloud_vm_monitoring.appdb import AppDB
 from fedcloud_vm_monitoring.site_monitor import SiteMonitor, SiteMonitorException
 from fedcloudclient.decorators import oidc_params
 from fedcloudclient.sites import list_sites
+from fedcloudclient.sites import find_endpoint_and_project_id
 
 
 @click.command()
@@ -79,21 +80,13 @@ def main(
                 "search_filter": ldap_search_filter,
             }
         )
-    sites = [site] if site else list_sites()
     appdb = AppDB(vo)
+    appdb_sites = appdb.get_sites_for_vo()
+    fedcloudclient_sites = list_sites(vo)
+    sites = [site] if site else set(appdb_sites + fedcloudclient_sites)
     for s in sites:
         click.secho(f"[.] Checking VO {vo} at {s}", fg="blue", bold=True)
-        if not appdb.vo_check(s):
-            click.secho(
-                f"[-] WARNING: VO {vo} is not available at {s} in AppDB", fg="yellow"
-            )
         site_monitor = SiteMonitor(s, vo, access_token, max_days, ldap_config)
-        if not site_monitor.vo_check():
-            click.secho(
-                f"[-] WARNING: VO {vo} is not available at {s} in fedcloudclient",
-                fg="yellow",
-            )
-            continue
         try:
             site_monitor.vm_monitor(delete)
         except SiteMonitorException as e:
