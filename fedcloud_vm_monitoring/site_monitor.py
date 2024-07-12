@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 
 import click
 import ldap3
+import paramiko
+from paramiko import SSHException
 from dateutil.parser import parse
 from fedcloudclient.openstack import fedcloud_openstack
 from fedcloudclient.sites import find_endpoint_and_project_id
@@ -124,12 +126,34 @@ class SiteMonitor:
             return f"{egi_user} not found in LDAP, has VO membership expired?"
         return self.user_emails[egi_user]
 
+    def get_public_ip(self, ip_addresses):
+        result = ""
+        for ip in ip_addresses:
+            if not ip.startswith('192.168') and not ip.startswith('172.16'):
+                result = ip
+        return result
+
+    def get_sshd_version(self, ip_addresses):
+        public_ip = self.get_public_ip(ip_addresses)
+        if len(public_ip) > 0:
+            try:
+                ssh = paramiko.Transport((public_ip, 22))
+                ssh.start_client()
+                result = ssh.remote_version
+                ssh.close()
+                return result
+            except SSHException:
+                return "SSHException: could not retrieve SSH version"
+        else:
+            return "No public IP available to check SSH version."
+
     def process_vm(self, vm):
         vm_info = self.get_vm(vm)
         flv = self.get_flavor(vm["Flavor"])
         vm_ips = []
         for net, addrs in vm["Networks"].items():
             vm_ips.extend(addrs)
+            sshd_version = self.get_sshd_version(addrs)
         created = parse(vm_info["created_at"])
         elapsed = self.now - created
         output = [
@@ -137,6 +161,7 @@ class SiteMonitor:
             ("instance id", vm["ID"]),
             ("status", click.style(vm["Status"], fg=self.color_maps[vm["Status"]])),
             ("ip address", " ".join(vm_ips)),
+            ("SSH version", sshd_version),
         ]
         if flv:
             output.append(
