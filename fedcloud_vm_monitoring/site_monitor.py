@@ -4,6 +4,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 import click
+import ipaddress
 import ldap3
 import paramiko
 from dateutil.parser import parse
@@ -129,7 +130,7 @@ class SiteMonitor:
     def get_public_ip(self, ip_addresses):
         result = ""
         for ip in ip_addresses:
-            if not ip.startswith("192.168") and not ip.startswith("172.16"):
+            if ipaddress.ip_address(ip).is_global:
                 result = ip
         return result
 
@@ -151,6 +152,7 @@ class SiteMonitor:
         vm_info = self.get_vm(vm)
         flv = self.get_flavor(vm["Flavor"])
         vm_ips = []
+        sshd_version = "N/A"
         for net, addrs in vm["Networks"].items():
             vm_ips.extend(addrs)
             sshd_version = self.get_sshd_version(addrs)
