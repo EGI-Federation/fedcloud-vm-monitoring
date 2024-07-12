@@ -193,7 +193,7 @@ class SiteMonitor:
                 )
             )
         output.append(
-            ("image: ", self.get_vm_image(vm["ID"], vm["Image Name"], vm["Image ID"]))
+            ("VM image", self.get_vm_image(vm["ID"], vm["Image Name"], vm["Image ID"]))
         )
         output.append(("created at", vm_info["created_at"]))
         output.append(("elapsed time", elapsed))
