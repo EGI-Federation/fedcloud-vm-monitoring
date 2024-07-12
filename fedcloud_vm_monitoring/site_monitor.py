@@ -1,10 +1,10 @@
 """Monitor VM instances running in the provider"""
 
+import ipaddress
 from collections import defaultdict
 from datetime import datetime, timezone
 
 import click
-import ipaddress
 import ldap3
 import paramiko
 from dateutil.parser import parse
