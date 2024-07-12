@@ -6,11 +6,11 @@ from datetime import datetime, timezone
 import click
 import ldap3
 import paramiko
-from paramiko import SSHException
 from dateutil.parser import parse
 from fedcloudclient.openstack import fedcloud_openstack
 from fedcloudclient.sites import find_endpoint_and_project_id
 from ldap3.core.exceptions import LDAPException
+from paramiko import SSHException
 
 
 class SiteMonitorException(Exception):
@@ -129,7 +129,7 @@ class SiteMonitor:
     def get_public_ip(self, ip_addresses):
         result = ""
         for ip in ip_addresses:
-            if not ip.startswith('192.168') and not ip.startswith('172.16'):
+            if not ip.startswith("192.168") and not ip.startswith("172.16"):
                 result = ip
         return result
 
