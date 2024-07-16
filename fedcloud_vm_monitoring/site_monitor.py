@@ -114,7 +114,7 @@ class SiteMonitor:
             return "image name not found"
 
     def get_vm_image(self, vm_id, image_name, image_id):
-        if len(image_name) > 0:
+        if (len(image_name) > 0) and (not 'booted from volume' in image_name):
             return image_name
         else:
             try:
