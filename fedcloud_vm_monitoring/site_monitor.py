@@ -116,8 +116,7 @@ class SiteMonitor:
             result = self._run_command(cmd)
             if len(result["attached_volumes"]) > 0:
                 return self.get_vm_image_volume_show(
-                    result["attached_volumes"][0]["id"],
-                    image_name
+                    result["attached_volumes"][0]["id"], image_name
                 )
             else:
                 return "image name not found"
