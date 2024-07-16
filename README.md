@@ -11,7 +11,7 @@ cloud providers supporting the OIDC protocol.
 - For getting the EGI user identity, cloud providers have to enable the
   `"identity:get_user"` API call for the user (see
   [VO auditing](https://docs.egi.eu/providers/cloud-compute/openstack/aai/#vo-auditing)
-  for more information
+  for more information)
 
 ## Installation
 
@@ -69,7 +69,9 @@ Getting VMs information  [####################################]  100%
     instance id    = 0d9d8c9b-a161-4b59-9ba6-7275e898c7fb
     status         = ACTIVE
     ip address     = 192.168.1.31
+    SSH version    = No public IP available to check SSH version.
     flavor         = svc1.m with 2 vCPU cores, 4 GB of RAM and 40 GB of local disk
+    VM image       = ubuntu-22.04-amd64-raw
     created at     = 2024-06-24T06:25:30Z
     elapsed time   = 14 days, 3:50:14.385004
     user           = [REDACTED]
@@ -78,7 +80,9 @@ Getting VMs information  [####################################]  100%
     instance id    = d6815b91-599d-4c6a-8d55-a38243148838
     status         = ACTIVE
     ip address     = 192.168.1.250 194.210.120.242
+    SSH version    = SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.6
     flavor         = svc2.l with 8 vCPU cores, 8 GB of RAM and 40 GB of local disk
+    VM image       = ubuntu-22.04-amd64-raw
     created at     = 2022-08-31T07:17:18Z
     elapsed time   = 677 days, 2:58:26.385004
     user           = [REDACTED]
@@ -88,7 +92,9 @@ Getting VMs information  [####################################]  100%
     instance id    = 045ec1e7-b47a-4f18-9c9f-06cb30803955
     status         = ACTIVE
     ip address     = 192.168.1.71 194.210.120.90
+    SSH version    = SSHException: could not retrieve SSH version
     flavor         = svc2.m with 4 vCPU cores, 4 GB of RAM and 40 GB of local disk
+    VM image       = image name not found
     created at     = 2020-11-13T09:01:32Z
     elapsed time   = 1333 days, 1:14:12.385004
     user           = [REDACTED]
@@ -110,7 +116,9 @@ Getting VMs information  [####################################]  100%
     instance id    = 5d56f0af-05aa-442a-8536-8667e9f81a82
     status         = ACTIVE
     ip address     = 192.168.10.9
-    flavor         = m1.large with 4 vCPU cores, 8 GB of RAM and 30 GB of local disk
+    SSH version    = No public IP available to check SSH version.
+    flavor         = m1.medium with 2 vCPU cores, 4 GB of RAM and 20 GB of local disk
+    VM image       = ubuntu-jammy-x86_64
     created at     = 2024-06-24T15:03:27Z
     elapsed time   = 13 days, 19:12:48.034861
     user           = [REDACTED]
@@ -121,7 +129,9 @@ Getting VMs information  [####################################]  100%
     instance id    = 46ec6648-d364-4ca7-9480-5af64cda9e9c
     status         = ACTIVE
     ip address     = 192.168.10.53
+    SSH version    = No public IP available to check SSH version.
     flavor         = m1.large with 4 vCPU cores, 8 GB of RAM and 30 GB of local disk
+    VM image       = ubuntu-jammy-x86_64
     created at     = 2024-04-12T06:48:32Z
     elapsed time   = 87 days, 3:27:43.034861
     user           = [REDACTED]
@@ -133,7 +143,9 @@ Getting VMs information  [####################################]  100%
     instance id    = 1beb4b53-d6e4-4e30-8046-222b4e82b806
     status         = ACTIVE
     ip address     = 192.168.10.72
+    SSH version    = No public IP available to check SSH version.
     flavor         = m1.large with 4 vCPU cores, 8 GB of RAM and 30 GB of local disk
+    VM image       = ubuntu-jammy-x86_64
     created at     = 2024-04-12T06:48:30Z
     elapsed time   = 87 days, 3:27:45.034861
     user           = [REDACTED]
@@ -145,7 +157,9 @@ Getting VMs information  [####################################]  100%
     instance id    = 8e530674-d4a6-482c-974f-376eacbe609a
     status         = ACTIVE
     ip address     = 192.168.10.144 147.213.76.76
+    SSH version    = SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.10
     flavor         = m1.large with 4 vCPU cores, 8 GB of RAM and 30 GB of local disk
+    VM image       = ubuntu-jammy-x86_64
     created at     = 2024-04-12T06:48:18Z
     elapsed time   = 87 days, 3:27:57.034861
     user           = [REDACTED]
@@ -157,7 +171,9 @@ Getting VMs information  [####################################]  100%
     instance id    = 8ef9fcce-19e4-41c6-ab03-d1730a924510
     status         = ACTIVE
     ip address     = 192.168.10.69 147.213.76.217
+    SSH version    = SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.11
     flavor         = m1.medium with 2 vCPU cores, 4 GB of RAM and 20 GB of local disk
+    VM image       = Ubuntu-20.04-20211006
     created at     = 2021-12-02T14:53:32Z
     elapsed time   = 948 days, 19:22:43.034861
     user           = [REDACTED]
