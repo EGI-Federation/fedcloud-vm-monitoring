@@ -84,8 +84,54 @@ class SiteMonitor:
             return {}
         return self.flavors[flavor_name]
 
+    def get_vm_image_volume_show(self, volume_id):
+        try:
+            cmd = ("volume", "show", volume_id, "--format", "json")
+            result = self._run_command(cmd)
+            if ("volume_image_metadata" in result) and (
+                "sl:osname" and "sl:osversion" in result["volume_image_metadata"]
+            ):
+                return (
+                    result["volume_image_metadata"]["sl:osname"]
+                    + result["volume_image_metadata"]["sl:osversion"]
+                )
+            else:
+                return "image name not found"
+        except SiteMonitorException:
+            return "image name not found"
+
+    def get_vm_image_server_show(self, vm_id):
+        try:
+            cmd = ("server", "show", vm_id, "--format", "json")
+            result = self._run_command(cmd)
+            if len(result["attached_volumes"]) > 0:
+                return self.get_vm_image_volume_show(
+                    result["attached_volumes"][0]["id"]
+                )
+            else:
+                return "image name not found"
+        except SiteMonitorException:
+            return "image name not found"
+
+    def get_vm_image(self, vm_id, image_name, image_id):
+        if len(image_name) > 0:
+            return image_name
+        else:
+            try:
+                cmd = ("image", "show", image_id, "--format", "json")
+                result = self._run_command(cmd)
+                if "sl:osname" and "sl:osversion" in result["properties"]:
+                    return (
+                        result["properties"]["sl:osname"]
+                        + result["properties"]["sl:osversion"]
+                    )
+                else:
+                    return self.get_vm_image_server_show(vm_id)
+            except SiteMonitorException:
+                return self.get_vm_image_server_show(vm_id)
+
     def get_vms(self):
-        command = ("server", "list")
+        command = ("server", "list", "--long")
         return self._run_command(command)
 
     def get_vm(self, vm):
@@ -173,6 +219,9 @@ class SiteMonitor:
                     f"GB of RAM and {flv['Disk']} GB of local disk",
                 )
             )
+        output.append(
+            ("VM image", self.get_vm_image(vm["ID"], vm["Image Name"], vm["Image ID"]))
+        )
         output.append(("created at", vm_info["created_at"]))
         output.append(("elapsed time", elapsed))
         user_id = vm_info["user_id"]
