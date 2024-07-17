@@ -93,14 +93,16 @@ class SiteMonitor:
             ):
                 return (
                     result["volume_image_metadata"]["sl:osname"]
-                    + " " + result["volume_image_metadata"]["sl:osversion"]
+                    + " "
+                    + result["volume_image_metadata"]["sl:osversion"]
                 )
             elif ("volume_image_metadata" in result) and (
                 "os_distro" and "os_version" in result["volume_image_metadata"]
             ):
                 return (
                     result["volume_image_metadata"]["os_distro"]
-                    + " " + result["volume_image_metadata"]["os_version"]
+                    + " "
+                    + result["volume_image_metadata"]["os_version"]
                 )
             elif ("volume_image_metadata" in result) and (
                 "image_name" in result["volume_image_metadata"]
@@ -158,7 +160,8 @@ class SiteMonitor:
                 if "sl:osname" and "sl:osversion" in result["properties"]:
                     return (
                         result["properties"]["sl:osname"]
-                        + " " + result["properties"]["sl:osversion"]
+                        + " "
+                        + result["properties"]["sl:osversion"]
                     )
                 else:
                     return self.get_vm_image_server_show(vm_id)
