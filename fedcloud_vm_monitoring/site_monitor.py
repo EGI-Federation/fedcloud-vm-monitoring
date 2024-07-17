@@ -84,13 +84,7 @@ class SiteMonitor:
             return {}
         return self.flavors[flavor_name]
 
-    def get_vm_image_name(self, image_name):
-        if len(image_name) > 0:
-            return image_name
-        else:
-            return "image name not found"
-
-    def get_vm_image_volume_show(self, volume_id, image_name):
+    def get_vm_image_volume_show(self, volume_id):
         try:
             cmd = ("volume", "show", volume_id, "--format", "json")
             result = self._run_command(cmd)
@@ -99,24 +93,33 @@ class SiteMonitor:
             ):
                 return (
                     result["volume_image_metadata"]["sl:osname"]
+                    + " "
                     + result["volume_image_metadata"]["sl:osversion"]
+                )
+            elif ("volume_image_metadata" in result) and (
+                "os_distro" and "os_version" in result["volume_image_metadata"]
+            ):
+                return (
+                    result["volume_image_metadata"]["os_distro"]
+                    + " "
+                    + result["volume_image_metadata"]["os_version"]
                 )
             elif ("volume_image_metadata" in result) and (
                 "image_name" in result["volume_image_metadata"]
             ):
                 return result["volume_image_metadata"]["image_name"]
             else:
-                return self.get_vm_image_name(image_name)
+                return "image name not found"
         except SiteMonitorException:
-            return self.get_vm_image_name(image_name)
+            return "image name not found"
 
-    def get_vm_image_server_show(self, vm_id, image_name):
+    def get_vm_image_server_show(self, vm_id):
         try:
             cmd = ("server", "show", vm_id, "--format", "json")
             result = self._run_command(cmd)
             if len(result["attached_volumes"]) > 0:
                 return self.get_vm_image_volume_show(
-                    result["attached_volumes"][0]["id"], image_name
+                    result["attached_volumes"][0]["id"]
                 )
             else:
                 return "image name not found"
@@ -124,18 +127,52 @@ class SiteMonitor:
             return "image name not found"
 
     def get_vm_image(self, vm_id, image_name, image_id):
-        try:
-            cmd = ("image", "show", image_id, "--format", "json")
-            result = self._run_command(cmd)
-            if "sl:osname" and "sl:osversion" in result["properties"]:
-                return (
-                    result["properties"]["sl:osname"]
-                    + result["properties"]["sl:osversion"]
-                )
-            else:
-                return self.get_vm_image_server_show(vm_id, image_name)
-        except SiteMonitorException:
-            return self.get_vm_image_server_show(vm_id, image_name)
+        """Commands to get VM images:
+        1. openstack server list --long -c "ID" -c "Name" -c "Image Name" -c "Image ID"
+
+        If "Image Name" is available, print it. If not, get details from image:
+        2. openstack image show <image-id>
+
+        If not, get details from attached volumes:
+        3a. openstack server show <vm-id>
+        3b. openstack volume show <volume-id>
+
+        Parameters
+        ----------
+        vm_id: str
+            The ID of the VM
+        image_name: str
+            The name of the VM image
+        image_id: str
+            The ID of the VM image
+
+        Returns
+        -------
+        str
+            a string with the name of the image
+        """
+        if (len(image_name) > 0) and ("booted from volume" not in image_name):
+            return image_name
+        else:
+            try:
+                cmd = ("image", "show", image_id, "--format", "json")
+                result = self._run_command(cmd)
+                if "sl:osname" and "sl:osversion" in result["properties"]:
+                    return (
+                        result["properties"]["sl:osname"]
+                        + " "
+                        + result["properties"]["sl:osversion"]
+                    )
+                elif "os_distro" and "os_version" in result["properties"]:
+                    return (
+                        result["properties"]["os_distro"]
+                        + " "
+                        + result["properties"]["os_version"]
+                    )
+                else:
+                    return self.get_vm_image_server_show(vm_id)
+            except SiteMonitorException:
+                return self.get_vm_image_server_show(vm_id)
 
     def get_vms(self):
         command = ("server", "list", "--long")
@@ -205,10 +242,9 @@ class SiteMonitor:
         vm_info = self.get_vm(vm)
         flv = self.get_flavor(vm["Flavor"])
         vm_ips = []
-        sshd_version = "N/A"
         for net, addrs in vm["Networks"].items():
             vm_ips.extend(addrs)
-            sshd_version = self.get_sshd_version(addrs)
+        sshd_version = self.get_sshd_version(vm_ips)
         created = parse(vm_info["created_at"])
         elapsed = self.now - created
         output = [
