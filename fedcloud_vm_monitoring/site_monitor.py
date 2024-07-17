@@ -236,10 +236,9 @@ class SiteMonitor:
         vm_info = self.get_vm(vm)
         flv = self.get_flavor(vm["Flavor"])
         vm_ips = []
-        sshd_version = "N/A"
         for net, addrs in vm["Networks"].items():
             vm_ips.extend(addrs)
-            sshd_version = self.get_sshd_version(addrs)
+        sshd_version = self.get_sshd_version(vm_ips)
         created = parse(vm_info["created_at"])
         elapsed = self.now - created
         output = [
