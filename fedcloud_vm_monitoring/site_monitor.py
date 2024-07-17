@@ -93,8 +93,19 @@ class SiteMonitor:
             ):
                 return (
                     result["volume_image_metadata"]["sl:osname"]
-                    + result["volume_image_metadata"]["sl:osversion"]
+                    + " " + result["volume_image_metadata"]["sl:osversion"]
                 )
+            elif ("volume_image_metadata" in result) and (
+                "os_distro" and "os_version" in result["volume_image_metadata"]
+            ):
+                return (
+                    result["volume_image_metadata"]["os_distro"]
+                    + " " + result["volume_image_metadata"]["os_version"]
+                )
+            elif ("volume_image_metadata" in result) and (
+                "image_name" in result["volume_image_metadata"]
+            ):
+                return result["volume_image_metadata"]["image_name"]
             else:
                 return "image name not found"
         except SiteMonitorException:
@@ -114,6 +125,30 @@ class SiteMonitor:
             return "image name not found"
 
     def get_vm_image(self, vm_id, image_name, image_id):
+        """Commands to get VM images:
+        1. openstack server list --long -c "ID" -c "Name" -c "Image Name" -c "Image ID"
+
+        If "Image Name" is available, print it. If not, get details from image:
+        2. openstack image show <image-id>
+
+        If not, get details from attached volumes:
+        3a. openstack server show <vm-id>
+        3b. openstack volume show <volume-id>
+
+        Parameters
+        ----------
+        vm_id: str
+            The ID of the VM
+        image_name: str
+            The name of the VM image
+        image_id: str
+            The ID of the VM image
+
+        Returns
+        -------
+        str
+            a string with the name of the image
+        """
         if (len(image_name) > 0) and ("booted from volume" not in image_name):
             return image_name
         else:
@@ -123,7 +158,7 @@ class SiteMonitor:
                 if "sl:osname" and "sl:osversion" in result["properties"]:
                     return (
                         result["properties"]["sl:osname"]
-                        + result["properties"]["sl:osversion"]
+                        + " " + result["properties"]["sl:osversion"]
                     )
                 else:
                     return self.get_vm_image_server_show(vm_id)
