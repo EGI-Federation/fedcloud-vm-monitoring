@@ -163,6 +163,12 @@ class SiteMonitor:
                         + " "
                         + result["properties"]["sl:osversion"]
                     )
+                elif "os_distro" and "os_version" in result["properties"]:
+                    return (
+                        result["properties"]["os_distro"]
+                        + " "
+                        + result["properties"]["os_version"]
+                    )
                 else:
                     return self.get_vm_image_server_show(vm_id)
             except SiteMonitorException:
