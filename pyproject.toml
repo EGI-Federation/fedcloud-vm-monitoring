@@ -11,7 +11,7 @@ fedcloud-vo-monitor = "fedcloud_vm_monitoring.cli:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-fedcloudclient = "^1.4.2"
+fedcloudclient = "^1.4.3"
 ldap3 = "^2.9.1"
 python-dateutil = "^2.9.0.post0"
 paramiko = "^3.4.0"
