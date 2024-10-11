@@ -284,9 +284,10 @@ class SiteMonitor:
             elif returncode_tcp == 1 and returncode_upd == 1:
                 return "CUPS port is closed"
             else:
-                return "Error checking CUPS port: " +
-                       "TCP return code: {returncode_tcp}, stdout: {stdout_tcp}, stderr: {stderr_tcp}" +
+                return ("Error checking CUPS port: "
+                       "TCP return code: {returncode_tcp}, stdout: {stdout_tcp}, stderr: {stderr_tcp}"
                        "UDP return code: {returncode_upd}, stdout: {stdout_upd}, stderr: {stderr_upd}"
+                       )
         else:
             return "No public IP available to check CUPs version"
 
