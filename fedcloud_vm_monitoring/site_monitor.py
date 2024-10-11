@@ -262,6 +262,9 @@ class SiteMonitor:
         return returncode, stdout, stderr
 
     def check_CUPS(self, ip_addresses):
+        returncode_ncat, stdout_ncat, stderr_ncat = self._run_shell_command("which ncat")
+        if returncode_ncat != 0:
+            return "ncat ( https://nmap.org/ncat ) is not installed"
         public_ip = self.get_public_ip(ip_addresses)
         if len(public_ip) > 0:
             returncode_tcp, stdout_tcp, stderr_tcp = self.check_open_port(public_ip, 631, "tcp")
@@ -269,7 +272,7 @@ class SiteMonitor:
             if returncode_tcp == 0 or returncode_upd == 0:
                 return "WARNING: CUPS port is open"
             elif returncode_tcp == 1 and returncode_upd == 1:
-                return "CUPS port is not open"
+                return "CUPS port is closed"
             else:
                 return "Error checking CUPS port: " + returncode + stdout + stderr
         else:
