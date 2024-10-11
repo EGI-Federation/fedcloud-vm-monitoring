@@ -12,6 +12,7 @@ from fedcloudclient.openstack import fedcloud_openstack
 from fedcloudclient.sites import find_endpoint_and_project_id
 from ldap3.core.exceptions import LDAPException
 from paramiko import SSHException
+import subprocess
 
 
 class SiteMonitorException(Exception):
@@ -238,6 +239,42 @@ class SiteMonitor:
         else:
             return "No public IP available to check SSH version."
 
+    def _run_shell_command(self, command):
+       completed = subprocess.run(
+           command,
+           shell=True,
+           capture_output=True,
+           text=True,
+       )
+       returncode = completed.returncode
+       stdout = completed.stdout
+       stderr = completed.stderr
+       return returncode, stdout, stderr
+
+    def check_open_port(self, ip, port, protocol):
+        if protocol == "tcp":
+            command = f"ncat --nodns -z {ip} {port}"
+        elif protocol == "udp":
+            command = f"ncat --udp --nodns --idle-timeout 3s {ip} {port}"
+        else:
+            raise SiteMonitorException(f"Protocol {protocol} not supported!")
+        returncode, stdout, stderr = self._run_shell_command(command)
+        return returncode, stdout, stderr
+
+    def check_CUPS(self, ip_addresses):
+        public_ip = self.get_public_ip(ip_addresses)
+        if len(public_ip) > 0:
+            returncode_tcp, stdout_tcp, stderr_tcp = self.check_open_port(public_ip, 631, "tcp")
+            returncode_upd, stdout_upd, stderr_upd = self.check_open_port(public_ip, 631, "udp")
+            if returncode_tcp == 0 or returncode_upd == 0:
+                return "WARNING: CUPS port is open"
+            elif returncode_tcp == 1 and returncode_upd == 1:
+                return "CUPS port is not open"
+            else:
+                return "Error checking CUPS port: " + returncode + stdout + stderr
+        else:
+            return "No public IP available to check CUPs version"
+
     def process_vm(self, vm):
         vm_info = self.get_vm(vm)
         flv = self.get_flavor(vm["Flavor"])
@@ -245,6 +282,7 @@ class SiteMonitor:
         for net, addrs in vm["Networks"].items():
             vm_ips.extend(addrs)
         sshd_version = self.get_sshd_version(vm_ips)
+        CUPS_check = self.check_CUPS(vm_ips)
         created = parse(vm_info["created_at"])
         elapsed = self.now - created
         output = [
@@ -253,6 +291,7 @@ class SiteMonitor:
             ("status", click.style(vm["Status"], fg=self.color_maps[vm["Status"]])),
             ("ip address", " ".join(vm_ips)),
             ("SSH version", sshd_version),
+            ("CUPS", CUPS_check),
         ]
         if flv:
             output.append(
