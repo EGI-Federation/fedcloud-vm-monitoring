@@ -100,7 +100,7 @@ def main(
     for s in sites:
         click.secho(f"[.] Checking VO {vo} at {s}", fg="blue", bold=True)
         site_monitor = SiteMonitor(
-            s, vo, access_token, max_days, check_ssh, check_cups, ldap_config)
+            s, vo, access_token, max_days, check_ssh, check_cups, ldap_config
         )
         try:
             site_monitor.vm_monitor(delete)
