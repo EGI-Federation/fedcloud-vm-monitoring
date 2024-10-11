@@ -1,6 +1,7 @@
 """Monitor VM instances running in the provider"""
 
 import ipaddress
+import subprocess
 from collections import defaultdict
 from datetime import datetime, timezone
 
@@ -12,7 +13,6 @@ from fedcloudclient.openstack import fedcloud_openstack
 from fedcloudclient.sites import find_endpoint_and_project_id
 from ldap3.core.exceptions import LDAPException
 from paramiko import SSHException
-import subprocess
 
 
 class SiteMonitorException(Exception):
@@ -28,7 +28,9 @@ class SiteMonitor:
     min_secgroup_instance_ratio = 3
     min_ip_instance_ratio = 1
 
-    def __init__(self, site, vo, token, max_days, check_ssh, check_cups, ldap_config={}):
+    def __init__(
+        self, site, vo, token, max_days, check_ssh, check_cups, ldap_config={}
+    ):
         self.site = site
         self.vo = vo
         self.token = token
@@ -242,16 +244,16 @@ class SiteMonitor:
             return "No public IP available to check SSH version."
 
     def _run_shell_command(self, command):
-       completed = subprocess.run(
-           command,
-           shell=True,
-           capture_output=True,
-           text=True,
-       )
-       returncode = completed.returncode
-       stdout = completed.stdout
-       stderr = completed.stderr
-       return returncode, stdout, stderr
+        completed = subprocess.run(
+            command,
+            shell=True,
+            capture_output=True,
+            text=True,
+        )
+        returncode = completed.returncode
+        stdout = completed.stdout
+        stderr = completed.stderr
+        return returncode, stdout, stderr
 
     def check_open_port(self, ip, port, protocol):
         if protocol == "tcp":
@@ -264,13 +266,19 @@ class SiteMonitor:
         return returncode, stdout, stderr
 
     def check_CUPS(self, ip_addresses):
-        returncode_ncat, stdout_ncat, stderr_ncat = self._run_shell_command("which ncat")
+        returncode_ncat, stdout_ncat, stderr_ncat = self._run_shell_command(
+            "which ncat"
+        )
         if returncode_ncat != 0:
             return "ncat ( https://nmap.org/ncat ) is not installed"
         public_ip = self.get_public_ip(ip_addresses)
         if len(public_ip) > 0:
-            returncode_tcp, stdout_tcp, stderr_tcp = self.check_open_port(public_ip, 631, "tcp")
-            returncode_upd, stdout_upd, stderr_upd = self.check_open_port(public_ip, 631, "udp")
+            returncode_tcp, stdout_tcp, stderr_tcp = self.check_open_port(
+                public_ip, 631, "tcp"
+            )
+            returncode_upd, stdout_upd, stderr_upd = self.check_open_port(
+                public_ip, 631, "udp"
+            )
             if returncode_tcp == 0 or returncode_upd == 0:
                 return "WARNING: CUPS port is open"
             elif returncode_tcp == 1 and returncode_upd == 1:
