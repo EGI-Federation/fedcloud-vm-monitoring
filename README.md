@@ -46,6 +46,9 @@ You can tune the behavior with the following parameters:
   triggering deletion (default 90 days).
 - `--show-quotas BOOLEAN`: whether to show quotas for the VO or not (default:
   `True`)
+- `--check-ssh BOOLEAN`: Check SSH version on target VMs (default: `False`)
+- `--check-cups BOOLEAN`: Check whether TCP/UDP port 631 is accessible
+  (default: `False`)
 
 If you have access to
 [Check-in LDAP](https://docs.egi.eu/users/aai/check-in/vos/#ldap) for VO

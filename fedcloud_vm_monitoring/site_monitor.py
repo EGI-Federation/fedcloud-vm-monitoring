@@ -28,11 +28,13 @@ class SiteMonitor:
     min_secgroup_instance_ratio = 3
     min_ip_instance_ratio = 1
 
-    def __init__(self, site, vo, token, max_days, ldap_config={}):
+    def __init__(self, site, vo, token, max_days, check_ssh, check_cups, ldap_config={}):
         self.site = site
         self.vo = vo
         self.token = token
         self.max_days = max_days
+        self.check_ssh = check_ssh
+        self.check_cups = check_cups
         self.ldap_config = ldap_config
         self.flavors = {}
         self.users = defaultdict(lambda: {})
@@ -293,9 +295,13 @@ class SiteMonitor:
             ("instance id", vm["ID"]),
             ("status", click.style(vm["Status"], fg=self.color_maps[vm["Status"]])),
             ("ip address", " ".join(vm_ips)),
-            ("SSH version", sshd_version),
-            ("CUPS", CUPS_check),
         ]
+        if self.check_ssh:
+            sshd_version = self.get_sshd_version(vm_ips)
+            output.append(("SSH version", sshd_version))
+        if self.check_cups:
+            CUPS_check = self.check_CUPS(vm_ips)
+            output.append(("CUPS", CUPS_check))
         if flv:
             output.append(
                 (
