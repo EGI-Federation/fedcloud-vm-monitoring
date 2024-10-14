@@ -250,10 +250,7 @@ class SiteMonitor:
             capture_output=True,
             text=True,
         )
-        returncode = completed.returncode
-        stdout = completed.stdout
-        stderr = completed.stderr
-        return returncode, stdout, stderr
+        return completed.returncode, completed.stdout, completed.stderr
 
     def check_open_port(self, ip, port, protocol):
         if protocol == "tcp":
