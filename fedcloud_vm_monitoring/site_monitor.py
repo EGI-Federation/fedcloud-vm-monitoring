@@ -1,6 +1,7 @@
 """Monitor VM instances running in the provider"""
 
 import ipaddress
+import subprocess
 from collections import defaultdict
 from datetime import datetime, timezone
 
@@ -27,11 +28,15 @@ class SiteMonitor:
     min_secgroup_instance_ratio = 3
     min_ip_instance_ratio = 1
 
-    def __init__(self, site, vo, token, max_days, ldap_config={}):
+    def __init__(
+        self, site, vo, token, max_days, check_ssh, check_cups, ldap_config={}
+    ):
         self.site = site
         self.vo = vo
         self.token = token
         self.max_days = max_days
+        self.check_ssh = check_ssh
+        self.check_cups = check_cups
         self.ldap_config = ldap_config
         self.flavors = {}
         self.users = defaultdict(lambda: {})
@@ -238,6 +243,52 @@ class SiteMonitor:
         else:
             return "No public IP available to check SSH version."
 
+    def _run_shell_command(self, command):
+        completed = subprocess.run(
+            command,
+            shell=True,
+            capture_output=True,
+            text=True,
+        )
+        return completed.returncode, completed.stdout, completed.stderr
+
+    def check_open_port(self, ip, port, protocol):
+        if protocol == "tcp":
+            command = f"ncat --nodns -z {ip} {port}"
+        elif protocol == "udp":
+            command = f"ncat --udp --nodns --idle-timeout 3s {ip} {port}"
+        else:
+            raise SiteMonitorException(f"Protocol {protocol} not supported!")
+        returncode, stdout, stderr = self._run_shell_command(command)
+        return returncode, stdout, stderr
+
+    def check_CUPS(self, ip_addresses):
+        returncode_ncat, stdout_ncat, stderr_ncat = self._run_shell_command(
+            "which ncat"
+        )
+        if returncode_ncat != 0:
+            return "ncat ( https://nmap.org/ncat ) is not installed"
+        public_ip = self.get_public_ip(ip_addresses)
+        if len(public_ip) > 0:
+            returncode_tcp, stdout_tcp, stderr_tcp = self.check_open_port(
+                public_ip, 631, "tcp"
+            )
+            returncode_upd, stdout_upd, stderr_upd = self.check_open_port(
+                public_ip, 631, "udp"
+            )
+            if returncode_tcp == 0 or returncode_upd == 0:
+                return "WARNING: CUPS port is open"
+            elif returncode_tcp == 1 and returncode_upd == 1:
+                return "CUPS port is closed"
+            else:
+                return (
+                    "Error checking CUPS port. "
+                    "TCP return code: {returncode_tcp}, stdout: {stdout_tcp}, stderr: {stderr_tcp}. "
+                    "UDP return code: {returncode_upd}, stdout: {stdout_upd}, stderr: {stderr_upd}."
+                )
+        else:
+            return "No public IP available to check CUPs version"
+
     def process_vm(self, vm):
         vm_info = self.get_vm(vm)
         flv = self.get_flavor(vm["Flavor"])
@@ -252,8 +303,13 @@ class SiteMonitor:
             ("instance id", vm["ID"]),
             ("status", click.style(vm["Status"], fg=self.color_maps[vm["Status"]])),
             ("ip address", " ".join(vm_ips)),
-            ("SSH version", sshd_version),
         ]
+        if self.check_ssh:
+            sshd_version = self.get_sshd_version(vm_ips)
+            output.append(("SSH version", sshd_version))
+        if self.check_cups:
+            CUPS_check = self.check_CUPS(vm_ips)
+            output.append(("CUPS", CUPS_check))
         if flv:
             output.append(
                 (

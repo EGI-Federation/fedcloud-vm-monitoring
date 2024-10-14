@@ -36,6 +36,18 @@ from fedcloudclient.sites import list_sites
     show_default=True,
 )
 @click.option(
+    "--check-ssh",
+    default=False,
+    help="Check SSH version on target VMs",
+    show_default=True,
+)
+@click.option(
+    "--check-cups",
+    default=False,
+    help="Check whether TCP/UDP port 631 is accessible",
+    show_default=True,
+)
+@click.option(
     "--ldap-server",
     default="ldaps://ldap.aai.egi.eu:636",
     help="LDAP server for VO membership",
@@ -62,6 +74,8 @@ def main(
     max_days,
     delete,
     show_quotas,
+    check_ssh,
+    check_cups,
     ldap_server,
     ldap_base_dn,
     ldap_user,
@@ -85,7 +99,9 @@ def main(
     sites = [site] if site else set(appdb_sites + fedcloudclient_sites)
     for s in sites:
         click.secho(f"[.] Checking VO {vo} at {s}", fg="blue", bold=True)
-        site_monitor = SiteMonitor(s, vo, access_token, max_days, ldap_config)
+        site_monitor = SiteMonitor(
+            s, vo, access_token, max_days, check_ssh, check_cups, ldap_config
+        )
         try:
             site_monitor.vm_monitor(delete)
         except SiteMonitorException as e:
