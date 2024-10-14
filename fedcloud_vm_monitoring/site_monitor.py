@@ -299,7 +299,6 @@ class SiteMonitor:
         for net, addrs in vm["Networks"].items():
             vm_ips.extend(addrs)
         sshd_version = self.get_sshd_version(vm_ips)
-        CUPS_check = self.check_CUPS(vm_ips)
         created = parse(vm_info["created_at"])
         elapsed = self.now - created
         output = [
