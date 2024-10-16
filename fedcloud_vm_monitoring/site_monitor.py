@@ -370,7 +370,7 @@ class SiteMonitor:
         return endpoint is not None
 
     def get_quota(self):
-        command = ("quota", "show")
+        command = ("quota", "show", "--usage")
         return self._run_command(command, do_raise=False)
 
     def show_quotas(self):
