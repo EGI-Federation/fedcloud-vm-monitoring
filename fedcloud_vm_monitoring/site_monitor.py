@@ -383,7 +383,7 @@ class SiteMonitor:
             "ram",
             "floating-ips",
             "secgroup-rules",
-            "secgroup",
+            "secgroups",
         ]
         quota_info = {}
         for r in quota:
