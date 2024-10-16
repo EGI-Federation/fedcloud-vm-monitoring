@@ -390,13 +390,18 @@ class SiteMonitor:
             if r["Resource"] in resources:
                 if r["Resource"] == "ram":
                     quota_info["ram (GB)"] = {
-                                "In Use": int(r["In Use"] / 1024),
-                                "Limit": int(r["Limit"] / 1024)
-                            }
+                        "In Use": int(r["In Use"] / 1024),
+                        "Limit": int(r["Limit"] / 1024)
+                    }
                 else:
                     quota_info[r["Resource"]] = {"In Use": r["In Use"], "Limit": r["Limit"]}
         for k, v in quota_info.items():
-            click.echo(f"    {k:<14} = {v}")
+            click.echo("    {:<14} = Limit: {:>3}, Used: {:>3} ({}%)".format(
+                k,
+                v["Limit"],
+                v["In Use"],
+                round(v["In Use"]/v["Limit"]*100)
+            ))
         # checks on quota
         if quota_info.get("ram (GB)").get("Limit", 1) / quota_info.get("cores").get("Limit", 1) < self.min_ram_cpu_ratio:
             click.secho(
