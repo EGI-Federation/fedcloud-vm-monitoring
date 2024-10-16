@@ -24,7 +24,7 @@ class SiteMonitor:
 
     color_maps = defaultdict(lambda: "red", ACTIVE="green", BUILD="yellow")
     # at least 1GB per core
-    min_ram_cpu_ratio = 1024
+    min_ram_cpu_ratio = 1
     min_secgroup_instance_ratio = 3
     min_ip_instance_ratio = 1
 
@@ -400,7 +400,7 @@ class SiteMonitor:
         # checks on quota
         if quota_info.get("ram (GB)").get("Limit", 1) / quota_info.get("cores").get("Limit", 1) < self.min_ram_cpu_ratio:
             click.secho(
-                f"[-] WARNING: Less than {int(self.min_ram_cpu_ratio/1024)} GB RAM per available CPU",
+                f"[-] WARNING: Less than {self.min_ram_cpu_ratio} GB RAM per available CPU",
                 fg="yellow",
             )
         if (
