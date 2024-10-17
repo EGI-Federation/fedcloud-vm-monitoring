@@ -403,7 +403,10 @@ class SiteMonitor:
                 round(v["In Use"]/v["Limit"]*100)
             ))
         # checks on quota
-        if quota_info.get("ram (GB)").get("Limit", 1) / quota_info.get("cores").get("Limit", 1) < self.min_ram_cpu_ratio:
+        if (
+            quota_info.get("ram (GB)").get("Limit", 1) / quota_info.get("cores").get("Limit", 1)
+            < self.min_ram_cpu_ratio:
+        ):
             click.secho(
                 f"[-] WARNING: Less than {self.min_ram_cpu_ratio} GB RAM per available CPU",
                 fg="yellow",
