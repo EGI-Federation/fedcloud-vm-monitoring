@@ -391,28 +391,32 @@ class SiteMonitor:
                 if r["Resource"] == "ram":
                     quota_info["ram (GB)"] = {
                         "In Use": int(r["In Use"] / 1024),
-                        "Limit": int(r["Limit"] / 1024)
+                        "Limit": int(r["Limit"] / 1024),
                     }
                 else:
-                    quota_info[r["Resource"]] = {"In Use": r["In Use"], "Limit": r["Limit"]}
+                    quota_info[r["Resource"]] = {
+                        "In Use": r["In Use"],
+                        "Limit": r["Limit"],
+                    }
         for k, v in quota_info.items():
-            click.echo("    {:<14} = Limit: {:>3}, Used: {:>3} ({}%)".format(
-                k,
-                v["Limit"],
-                v["In Use"],
-                round(v["In Use"]/v["Limit"]*100)
-            ))
+            click.echo(
+                "    {:<14} = Limit: {:>3}, Used: {:>3} ({}%)".format(
+                    k, v["Limit"], v["In Use"], round(v["In Use"] / v["Limit"] * 100)
+                )
+            )
         # checks on quota
         if (
-            quota_info.get("ram (GB)").get("Limit", 1) / quota_info.get("cores").get("Limit", 1)
-            < self.min_ram_cpu_ratio:
+            quota_info.get("ram (GB)").get("Limit", 1)
+            / quota_info.get("cores").get("Limit", 1)
+            < self.min_ram_cpu_ratio
         ):
             click.secho(
                 f"[-] WARNING: Less than {self.min_ram_cpu_ratio} GB RAM per available CPU",
                 fg="yellow",
             )
         if (
-            quota_info.get("secgroups").get("Limit", 1) / quota_info.get("instances").get("Limit", 1)
+            quota_info.get("secgroups").get("Limit", 1)
+            / quota_info.get("instances").get("Limit", 1)
             < self.min_secgroup_instance_ratio
         ):
             click.secho(
@@ -420,7 +424,8 @@ class SiteMonitor:
                 fg="yellow",
             )
         if (
-            quota_info.get("floating-ips").get("Limit", 1) / quota_info.get("instances").get("Limit", 1)
+            quota_info.get("floating-ips").get("Limit", 1)
+            / quota_info.get("instances").get("Limit", 1)
             < self.min_ip_instance_ratio
         ):
             click.secho(
