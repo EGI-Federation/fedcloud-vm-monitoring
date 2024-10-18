@@ -91,7 +91,7 @@ class SiteMonitor:
 
     def get_vm_image_volume_show(self, volume_id):
         try:
-            cmd = ("volume", "show", volume_id, "--format", "json")
+            cmd = ("volume", "show", volume_id)
             result = self._run_command(cmd)
             if ("volume_image_metadata" in result) and (
                 "sl:osname" and "sl:osversion" in result["volume_image_metadata"]
@@ -118,20 +118,7 @@ class SiteMonitor:
         except SiteMonitorException:
             return "image name not found"
 
-    def get_vm_image_server_show(self, vm_id):
-        try:
-            cmd = ("server", "show", vm_id, "--format", "json")
-            result = self._run_command(cmd)
-            if len(result["attached_volumes"]) > 0:
-                return self.get_vm_image_volume_show(
-                    result["attached_volumes"][0]["id"]
-                )
-            else:
-                return "image name not found"
-        except SiteMonitorException:
-            return "image name not found"
-
-    def get_vm_image(self, vm_id, image_name, image_id):
+    def get_vm_image(self, vm_id, image_name, image_id, attached_volumes):
         """Commands to get VM images:
         1. openstack server list --long -c "ID" -c "Name" -c "Image Name" -c "Image ID"
 
@@ -159,8 +146,9 @@ class SiteMonitor:
         if (len(image_name) > 0) and ("booted from volume" not in image_name):
             return image_name
         else:
+            # check image properties with "openstack image show"
             try:
-                cmd = ("image", "show", image_id, "--format", "json")
+                cmd = ("image", "show", image_id)
                 result = self._run_command(cmd)
                 if "sl:osname" and "sl:osversion" in result["properties"]:
                     return (
@@ -175,9 +163,18 @@ class SiteMonitor:
                         + result["properties"]["os_version"]
                     )
                 else:
-                    return self.get_vm_image_server_show(vm_id)
+                    # check volumes attached
+                    if len(attached_volumes) > 0:
+                        return self.get_vm_image_volume_show(
+                            attached_volumes[0]["id"]
+                        )
+                    else:
+                        return "image name not found"
             except SiteMonitorException:
-                return self.get_vm_image_server_show(vm_id)
+                if len(attached_volumes) > 0:
+                    return self.get_vm_image_volume_show(attached_volumes[0]["id"])
+                else:
+                    return "image not found"
 
     def get_vms(self):
         command = ("server", "list", "--long")
@@ -319,7 +316,7 @@ class SiteMonitor:
                 )
             )
         output.append(
-            ("VM image", self.get_vm_image(vm["ID"], vm["Image Name"], vm["Image ID"]))
+            ("VM image", self.get_vm_image(vm["ID"], vm["Image Name"], vm["Image ID"], vm_info["attached_volumes"]))
         )
         output.append(("created at", vm_info["created_at"]))
         output.append(("elapsed time", elapsed))
