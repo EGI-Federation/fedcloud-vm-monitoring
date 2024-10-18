@@ -165,9 +165,7 @@ class SiteMonitor:
                 else:
                     # check volumes attached
                     if len(attached_volumes) > 0:
-                        return self.get_vm_image_volume_show(
-                            attached_volumes[0]["id"]
-                        )
+                        return self.get_vm_image_volume_show(attached_volumes[0]["id"])
                     else:
                         return "image name not found"
             except SiteMonitorException:
@@ -316,7 +314,15 @@ class SiteMonitor:
                 )
             )
         output.append(
-            ("VM image", self.get_vm_image(vm["ID"], vm["Image Name"], vm["Image ID"], vm_info["attached_volumes"]))
+            (
+                "VM image",
+                self.get_vm_image(
+                    vm["ID"],
+                    vm["Image Name"],
+                    vm["Image ID"],
+                    vm_info["attached_volumes"],
+                ),
+            )
         )
         output.append(("created at", vm_info["created_at"]))
         output.append(("elapsed time", elapsed))
