@@ -24,7 +24,7 @@ class SiteMonitor:
 
     color_maps = defaultdict(lambda: "red", ACTIVE="green", BUILD="yellow")
     # at least 1GB per core
-    min_ram_cpu_ratio = 1024
+    min_ram_cpu_ratio = 1
     min_secgroup_instance_ratio = 3
     min_ip_instance_ratio = 1
 
@@ -370,7 +370,7 @@ class SiteMonitor:
         return endpoint is not None
 
     def get_quota(self):
-        command = ("quota", "show")
+        command = ("quota", "show", "--usage")
         return self._run_command(command, do_raise=False)
 
     def show_quotas(self):
@@ -383,25 +383,40 @@ class SiteMonitor:
             "ram",
             "floating-ips",
             "secgroup-rules",
-            "secgroup",
+            "secgroups",
         ]
         quota_info = {}
         for r in quota:
             if r["Resource"] in resources:
                 if r["Resource"] == "ram":
-                    quota_info[r["Resource"] + " (GB)"] = int(r["Limit"] / 1024)
+                    quota_info["ram (GB)"] = {
+                        "In Use": int(r["In Use"] / 1024),
+                        "Limit": int(r["Limit"] / 1024),
+                    }
                 else:
-                    quota_info[r["Resource"]] = r["Limit"]
+                    quota_info[r["Resource"]] = {
+                        "In Use": r["In Use"],
+                        "Limit": r["Limit"],
+                    }
         for k, v in quota_info.items():
-            click.echo(f"    {k:<14} = {v}")
+            click.echo(
+                "    {:<14} = Limit: {:>3}, Used: {:>3} ({}%)".format(
+                    k, v["Limit"], v["In Use"], round(v["In Use"] / v["Limit"] * 100)
+                )
+            )
         # checks on quota
-        if quota_info.get("ram", 1) / quota_info.get("cpu", 1) < self.min_ram_cpu_ratio:
+        if (
+            quota_info.get("ram (GB)").get("Limit", 1)
+            / quota_info.get("cores").get("Limit", 1)
+            < self.min_ram_cpu_ratio
+        ):
             click.secho(
-                f"[-] WARNING: Less than {int(self.min_ram_cpu_ratio/1024)} GB RAM per available CPU",
+                f"[-] WARNING: Less than {self.min_ram_cpu_ratio} GB RAM per available CPU",
                 fg="yellow",
             )
         if (
-            quota_info.get("secgroup", 1) / quota_info.get("instances", 1)
+            quota_info.get("secgroups").get("Limit", 1)
+            / quota_info.get("instances").get("Limit", 1)
             < self.min_secgroup_instance_ratio
         ):
             click.secho(
@@ -409,7 +424,8 @@ class SiteMonitor:
                 fg="yellow",
             )
         if (
-            quota_info.get("floating-ips", 1) / quota_info.get("instances", 1)
+            quota_info.get("floating-ips").get("Limit", 1)
+            / quota_info.get("instances").get("Limit", 1)
             < self.min_ip_instance_ratio
         ):
             click.secho(
