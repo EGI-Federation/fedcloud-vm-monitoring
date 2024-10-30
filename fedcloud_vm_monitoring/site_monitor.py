@@ -375,7 +375,10 @@ class SiteMonitor:
         result = self._run_command(command)
         floating_ips_down = [fip["Floating IP Address"] for fip in result]
         if len(floating_ips_down) > 0:
-            click.secho("[-] WARNING List of unused floating IPs: {}".format(floating_ips_down) ,fg="yellow")
+            click.secho(
+                "[-] WARNING List of unused floating IPs: {}".format(floating_ips_down),
+                fg="yellow",
+            )
 
     def vo_check(self):
         endpoint, _, _ = find_endpoint_and_project_id(self.site, self.vo)
