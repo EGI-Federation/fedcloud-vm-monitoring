@@ -109,9 +109,6 @@ def main(
                 site_monitor.show_quotas()
             site_monitor.check_unused_floating_ips()
             site_monitor.check_unused_security_groups()
+            site_monitor.check_unused_volumes()
         except SiteMonitorException as e:
             click.echo(" ".join([click.style("ERROR:", fg="red"), str(e)]), err=True)
-        # TODO: volumes, ips, should look for those older than X days
-        #       and not attached to any VM for deletion
-        # site_monitor.vol_monitor()
-        # site_monitor.ip_monitor()

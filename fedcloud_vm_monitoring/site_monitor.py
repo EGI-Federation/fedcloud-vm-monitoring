@@ -398,6 +398,26 @@ class SiteMonitor:
                 fg="yellow",
             )
 
+    def check_unused_volumes(self):
+        # get list of unused volumes in <vo, site>
+        command = ("volume", "list", "--status", "available")
+        result = self._run_command(command)
+        unused_capacity = 0
+        unused_volumes = []
+        for volume in result:
+            unused_capacity += volume["Size"]
+            unused_volumes.append(volume["Name"] if len(volume["Name"])>0 else volume["ID"])
+        if unused_capacity > 0:
+            click.secho(
+                "[-] WARNING: List of unused volumes: {}".format(unused_volumes),
+                fg="yellow",
+            )
+            click.secho(
+                "[-] WARNING: {} GB could be claimed back deleting unused volumes.".format(unused_capacity),
+                fg="yellow",
+            )
+
+
     def vo_check(self):
         endpoint, _, _ = find_endpoint_and_project_id(self.site, self.vo)
         return endpoint is not None
