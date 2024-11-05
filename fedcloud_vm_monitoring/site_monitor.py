@@ -294,7 +294,7 @@ class SiteMonitor:
         sshd_version = self.get_sshd_version(vm_ips)
         created = parse(vm_info["created_at"])
         elapsed = self.now - created
-        secgroups = set([secgroup['name'] for secgroup in vm_info["security_groups"]])
+        secgroups = set([secgroup["name"] for secgroup in vm_info["security_groups"]])
         output = [
             ("instance name", vm["Name"]),
             ("instance id", vm["ID"]),
@@ -344,7 +344,12 @@ class SiteMonitor:
             output.append(
                 ("IM id", vm_info["properties"].get("eu.egi.cloud.orchestrator.id", ""))
             )
-        return {"ID": vm["ID"], "output": output, "elapsed": elapsed, "secgroups": secgroups}
+        return {
+            "ID": vm["ID"],
+            "output": output,
+            "elapsed": elapsed,
+            "secgroups": secgroups,
+        }
 
     def vm_monitor(self, delete=False):
         all_vms = self.get_vms()
@@ -378,12 +383,14 @@ class SiteMonitor:
         command = ("security", "group", "list", "--project", project_id)
         result = self._run_command(command)
         # until we get security group IDs attached to VMs
-        #all_secgroups = set([secgroup["ID"] for secgroup in result])
+        # all_secgroups = set([secgroup["ID"] for secgroup in result])
         all_secgroups = set([secgroup["Name"] for secgroup in result])
         unused_secgroups = all_secgroups - self.used_security_groups
         if len(unused_secgroups) > 0:
             click.secho(
-                "[-] WARNING: List of unused security groups: {}".format(unused_secgroups),
+                "[-] WARNING: List of unused security groups: {}".format(
+                    unused_secgroups
+                ),
                 fg="yellow",
             )
 
@@ -394,7 +401,9 @@ class SiteMonitor:
         floating_ips_down = [fip["Floating IP Address"] for fip in result]
         if len(floating_ips_down) > 0:
             click.secho(
-                "[-] WARNING: List of unused floating IPs: {}".format(floating_ips_down),
+                "[-] WARNING: List of unused floating IPs: {}".format(
+                    floating_ips_down
+                ),
                 fg="yellow",
             )
 
@@ -406,17 +415,20 @@ class SiteMonitor:
         unused_volumes = []
         for volume in result:
             unused_capacity += volume["Size"]
-            unused_volumes.append(volume["Name"] if len(volume["Name"])>0 else volume["ID"])
+            unused_volumes.append(
+                volume["Name"] if len(volume["Name"]) > 0 else volume["ID"]
+            )
         if unused_capacity > 0:
             click.secho(
                 "[-] WARNING: List of unused volumes: {}".format(unused_volumes),
                 fg="yellow",
             )
             click.secho(
-                "[-] WARNING: {} GB could be claimed back deleting unused volumes.".format(unused_capacity),
+                "[-] WARNING: {} GB could be claimed back deleting unused volumes.".format(
+                    unused_capacity
+                ),
                 fg="yellow",
             )
-
 
     def vo_check(self):
         endpoint, _, _ = find_endpoint_and_project_id(self.site, self.vo)
