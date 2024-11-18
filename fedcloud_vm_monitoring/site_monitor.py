@@ -42,6 +42,7 @@ class SiteMonitor:
         self.users = defaultdict(lambda: {})
         self.user_emails = {}
         self.now = datetime.now(timezone.utc)
+        self.used_security_groups = set()
 
     def _run_command(self, command, do_raise=True, json_output=True, scoped=True):
         vo = self.vo if scoped else None
@@ -91,7 +92,7 @@ class SiteMonitor:
 
     def get_vm_image_volume_show(self, volume_id):
         try:
-            cmd = ("volume", "show", volume_id, "--format", "json")
+            cmd = ("volume", "show", volume_id)
             result = self._run_command(cmd)
             if ("volume_image_metadata" in result) and (
                 "sl:osname" and "sl:osversion" in result["volume_image_metadata"]
@@ -118,20 +119,7 @@ class SiteMonitor:
         except SiteMonitorException:
             return "image name not found"
 
-    def get_vm_image_server_show(self, vm_id):
-        try:
-            cmd = ("server", "show", vm_id, "--format", "json")
-            result = self._run_command(cmd)
-            if len(result["attached_volumes"]) > 0:
-                return self.get_vm_image_volume_show(
-                    result["attached_volumes"][0]["id"]
-                )
-            else:
-                return "image name not found"
-        except SiteMonitorException:
-            return "image name not found"
-
-    def get_vm_image(self, vm_id, image_name, image_id):
+    def get_vm_image(self, vm_id, image_name, image_id, attached_volumes):
         """Commands to get VM images:
         1. openstack server list --long -c "ID" -c "Name" -c "Image Name" -c "Image ID"
 
@@ -159,8 +147,9 @@ class SiteMonitor:
         if (len(image_name) > 0) and ("booted from volume" not in image_name):
             return image_name
         else:
+            # check image properties with "openstack image show"
             try:
-                cmd = ("image", "show", image_id, "--format", "json")
+                cmd = ("image", "show", image_id)
                 result = self._run_command(cmd)
                 if "sl:osname" and "sl:osversion" in result["properties"]:
                     return (
@@ -175,9 +164,16 @@ class SiteMonitor:
                         + result["properties"]["os_version"]
                     )
                 else:
-                    return self.get_vm_image_server_show(vm_id)
+                    # check volumes attached
+                    if len(attached_volumes) > 0:
+                        return self.get_vm_image_volume_show(attached_volumes[0]["id"])
+                    else:
+                        return "image name not found"
             except SiteMonitorException:
-                return self.get_vm_image_server_show(vm_id)
+                if len(attached_volumes) > 0:
+                    return self.get_vm_image_volume_show(attached_volumes[0]["id"])
+                else:
+                    return "image not found"
 
     def get_vms(self):
         command = ("server", "list", "--long")
@@ -298,11 +294,13 @@ class SiteMonitor:
         sshd_version = self.get_sshd_version(vm_ips)
         created = parse(vm_info["created_at"])
         elapsed = self.now - created
+        secgroups = set([secgroup["name"] for secgroup in vm_info["security_groups"]])
         output = [
             ("instance name", vm["Name"]),
             ("instance id", vm["ID"]),
             ("status", click.style(vm["Status"], fg=self.color_maps[vm["Status"]])),
             ("ip address", " ".join(vm_ips)),
+            ("sec. groups", secgroups),
         ]
         if self.check_ssh:
             sshd_version = self.get_sshd_version(vm_ips)
@@ -319,7 +317,15 @@ class SiteMonitor:
                 )
             )
         output.append(
-            ("VM image", self.get_vm_image(vm["ID"], vm["Image Name"], vm["Image ID"]))
+            (
+                "VM image",
+                self.get_vm_image(
+                    vm["ID"],
+                    vm["Image Name"],
+                    vm["Image ID"],
+                    vm_info["attached_volumes"],
+                ),
+            )
         )
         output.append(("created at", vm_info["created_at"]))
         output.append(("elapsed time", elapsed))
@@ -338,7 +344,12 @@ class SiteMonitor:
             output.append(
                 ("IM id", vm_info["properties"].get("eu.egi.cloud.orchestrator.id", ""))
             )
-        return {"ID": vm["ID"], "output": output, "elapsed": elapsed}
+        return {
+            "ID": vm["ID"],
+            "output": output,
+            "elapsed": elapsed,
+            "secgroups": secgroups,
+        }
 
     def vm_monitor(self, delete=False):
         all_vms = self.get_vms()
@@ -364,6 +375,60 @@ class SiteMonitor:
                 if delete:
                     if click.confirm("Do you want to delete the instance?"):
                         self.delete_vm(vm)
+            # union of sets
+            self.used_security_groups = self.used_security_groups | vm["secgroups"]
+
+    def check_unused_security_groups(self):
+        _, project_id, _ = find_endpoint_and_project_id(self.site, self.vo)
+        command = ("security", "group", "list", "--project", project_id)
+        result = self._run_command(command)
+        # until we get security group IDs attached to VMs
+        # all_secgroups = set([secgroup["ID"] for secgroup in result])
+        all_secgroups = set([secgroup["Name"] for secgroup in result])
+        unused_secgroups = all_secgroups - self.used_security_groups
+        if len(unused_secgroups) > 0:
+            click.secho(
+                "[-] WARNING: List of unused security groups: {}".format(
+                    unused_secgroups
+                ),
+                fg="yellow",
+            )
+
+    def check_unused_floating_ips(self):
+        # get list of unused floating IPs in <vo, site>
+        command = ("floating", "ip", "list", "--status", "DOWN")
+        result = self._run_command(command)
+        floating_ips_down = [fip["Floating IP Address"] for fip in result]
+        if len(floating_ips_down) > 0:
+            click.secho(
+                "[-] WARNING: List of unused floating IPs: {}".format(
+                    floating_ips_down
+                ),
+                fg="yellow",
+            )
+
+    def check_unused_volumes(self):
+        # get list of unused volumes in <vo, site>
+        command = ("volume", "list", "--status", "available")
+        result = self._run_command(command)
+        unused_capacity = 0
+        unused_volumes = []
+        for volume in result:
+            unused_capacity += volume["Size"]
+            unused_volumes.append(
+                volume["Name"] if len(volume["Name"]) > 0 else volume["ID"]
+            )
+        if unused_capacity > 0:
+            click.secho(
+                "[-] WARNING: List of unused volumes: {}".format(unused_volumes),
+                fg="yellow",
+            )
+            click.secho(
+                "[-] WARNING: {} GB could be claimed back deleting unused volumes.".format(
+                    unused_capacity
+                ),
+                fg="yellow",
+            )
 
     def vo_check(self):
         endpoint, _, _ = find_endpoint_and_project_id(self.site, self.vo)
