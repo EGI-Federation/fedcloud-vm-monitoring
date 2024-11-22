@@ -1,13 +1,9 @@
 """Classes to interact with the GOCDB"""
 
-import datetime
-import numbers
 import re
-import pprint
 
 import httpx
 import xmltodict
-import yaml
 
 GOC_PUBLIC_URL = "https://goc.egi.eu/gocdbpi/public/"
 GOC_PRIVATE_URL = "https://goc.egi.eu/gocdbpi/private/"
