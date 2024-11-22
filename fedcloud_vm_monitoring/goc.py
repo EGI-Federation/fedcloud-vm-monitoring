@@ -1,17 +1,19 @@
 """Classes to interact with the GOCDB"""
 
-import re
 import datetime
-import httpx
-import pprint
-import xmltodict
 import numbers
+import re
+import pprint
+
+import httpx
+import xmltodict
 import yaml
 
 GOC_PUBLIC_URL = "https://goc.egi.eu/gocdbpi/public/"
 GOC_PRIVATE_URL = "https://goc.egi.eu/gocdbpi/private/"
 SERVICE_TYPES = ["org.openstack.nova"]
 SLA_GROUP_RE = r"EGI_(.*)_SLA"
+
 
 class GOCDB:
     def __init__(self):
@@ -50,9 +52,7 @@ class GOCDB:
                 if svc:
                     for site in svc["SITENAME"]:
                         site_info = sites.get("site", dict())
-                        site_info[sla_name] = {
-                            "vos": set(vos or [])
-                        }
+                        site_info[sla_name] = {"vos": set(vos or [])}
                         sites[site] = site_info
         return sites
 

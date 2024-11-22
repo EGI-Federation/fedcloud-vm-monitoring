@@ -1,21 +1,22 @@
 """Monitor Accounting status"""
 
-import click
 import importlib
+
+import click
+import yaml
+
+from fedcloud_vm_monitoring.accounting import Accounting
 from fedcloud_vm_monitoring.appdb import AppDB
+from fedcloud_vm_monitoring.goc import GOCDB
 from fedcloud_vm_monitoring.site_monitor import SiteMonitor, SiteMonitorException
 from fedcloudclient.decorators import oidc_params
 from fedcloudclient.sites import list_sites
 
-import yaml
-
-from fedcloud_vm_monitoring.accounting import Accounting
-from fedcloud_vm_monitoring.goc import GOCDB 
 
 def check_site_slas(site, site_slas, goc, acct):
     click.echo(f"[-] Checking accounting for site {site}")
     sla_vos = set()
-    if site not in site_slas: 
+    if site not in site_slas:
         click.echo(f"[I] {site} is not present in any SLA")
     else:
         for sla_name, sla in site_slas[site].items():
@@ -26,7 +27,9 @@ def check_site_slas(site, site_slas, goc, acct):
                     f"[OK] SITE {site} has accouting info for SLA {sla_name} ({accounted_vos})"
                 )
             else:
-                click.echo(f"[ERR] SITE {site} has no accouting info for SLA {sla_name}")
+                click.echo(
+                    f"[ERR] SITE {site} has no accouting info for SLA {sla_name}"
+                )
     click.echo("[-] Checking aditional VOs")
     # Now check which VOs are being reported without a SLA
     if not sla_vos:
@@ -37,10 +40,7 @@ def check_site_slas(site, site_slas, goc, acct):
             f"[W] Site {site} has accounting for VOs {non_sla_vos}, non covered by SLA"
         )
     if "ops" not in acct.site_vos(site):
-        click.echo(
-            f"[W] SITE {site} has accounting for ops"
-        )
-
+        click.echo(f"[W] SITE {site} has accounting for ops")
 
 
 @click.command()
@@ -56,7 +56,9 @@ def main(
         with open(vo_map_file) as f:
             vo_map_src = f.read()
     else:
-        vo_map_src = importlib.resources.read_text("fedcloud_vm_monitoring.data", "vos.yaml")
+        vo_map_src = importlib.resources.read_text(
+            "fedcloud_vm_monitoring.data", "vos.yaml"
+        )
     vo_map = yaml.load(vo_map_src, Loader=yaml.SafeLoader)
     acct = Accounting()
     goc = GOCDB()

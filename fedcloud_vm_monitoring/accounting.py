@@ -1,11 +1,13 @@
 """Class for interaction with the accounting portal"""
 
-import numbers
 import datetime
+import numbers
+
 import httpx
 
 ACCOUNTING_URL = "https://accounting.egi.eu/"
 SITE_VO_ACCOUNTING = "cloud/sum_elap_processors/SITE/VO/{start_year}/{start_month}/{end_year}/{end_month}/all/onlyinfrajobs/JSON/"
+
 
 class Accounting:
     def __init__(self):
@@ -16,8 +18,10 @@ class Accounting:
         start = today - datetime.timedelta(days=90)
         print(start)
         url = ACCOUNTING_URL + SITE_VO_ACCOUNTING.format(
-            start_year=start.year, start_month=start.month,
-            end_year=today.year, end_month=today.month,
+            start_year=start.year,
+            start_month=start.month,
+            end_year=today.year,
+            end_month=today.month,
         )
         # accounting generates a redirect here
         r = httpx.get(url, follow_redirects=True)
