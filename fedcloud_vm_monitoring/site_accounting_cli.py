@@ -4,7 +4,6 @@ import importlib
 
 import click
 import yaml
-
 from fedcloud_vm_monitoring.accounting import Accounting
 from fedcloud_vm_monitoring.goc import GOCDB
 

@@ -6,9 +6,11 @@ import numbers
 import httpx
 
 ACCOUNTING_URL = "https://accounting.egi.eu/"
-SITE_VO_ACCOUNTING = ("cloud/sum_elap_processors/SITE/VO/"
-                      "{start_year}/{start_month}/{end_year}/{end_month}"
-                      "/all/onlyinfrajobs/JSON/")
+SITE_VO_ACCOUNTING = (
+    "cloud/sum_elap_processors/SITE/VO/"
+    "{start_year}/{start_month}/{end_year}/{end_month}"
+    "/all/onlyinfrajobs/JSON/"
+)
 
 
 class Accounting:
