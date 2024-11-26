@@ -11,7 +11,7 @@ include = [
 
 [tool.poetry.scripts]
 fedcloud-vo-monitor = "fedcloud_vm_monitoring.vm_monitor_cli:main"
-fedcloud-site-accountoung = "fedcloud_vm_monitoring.site_accounting_cli:main"
+fedcloud-site-sla = "fedcloud_vm_monitoring.site_sla_cli:main"
 
 
 [tool.poetry.dependencies]
