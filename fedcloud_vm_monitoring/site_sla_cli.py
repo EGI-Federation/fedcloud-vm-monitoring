@@ -33,9 +33,7 @@ def check_site_slas(site, site_slas, goc, acct, appdb):
                     f"[OK] SITE {site} has configured {info_vos} for SLA {sla_name}"
                 )
             else:
-                click.echo(
-                    f"[ERR] SITE {site} has no configured VO for SLA {sla_name}"
-                )
+                click.echo(f"[ERR] SITE {site} has no configured VO for SLA {sla_name}")
     click.echo("[-] Checking aditional VOs")
     # Now check which VOs are being reported without a SLA
     if not sla_vos:

@@ -12,6 +12,7 @@ SITE_VO_ACCOUNTING = (
     "/all/onlyinfrajobs/JSON/"
 )
 
+
 class Accounting:
     def __init__(self):
         self._data = {}
