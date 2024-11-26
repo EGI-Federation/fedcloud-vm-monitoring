@@ -46,10 +46,10 @@ class GOCDB:
             for endpoint in endpoints:
                 svc = self.get_endpoint_site(endpoint)
                 if svc:
-                    for site in svc["SITENAME"]:
-                        site_info = sites.get("site", dict())
-                        site_info[sla_name] = {"vos": set(vos or [])}
-                        sites[site] = site_info
+                    site = svc["SITENAME"]
+                    site_info = sites.get("site", dict())
+                    site_info[sla_name] = {"vos": set(vos or [])}
+                    sites[site] = site_info
         return sites
 
     def get_endpoint_site(self, endpoint):

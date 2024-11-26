@@ -12,15 +12,14 @@ SITE_VO_ACCOUNTING = (
     "/all/onlyinfrajobs/JSON/"
 )
 
-
 class Accounting:
     def __init__(self):
         self._data = {}
 
     def _get_accounting_data(self):
+        """Gets accounting data for sites / vos over the last 90 days"""
         today = datetime.date.today()
         start = today - datetime.timedelta(days=90)
-        print(start)
         url = ACCOUNTING_URL + SITE_VO_ACCOUNTING.format(
             start_year=start.year,
             start_month=start.month,

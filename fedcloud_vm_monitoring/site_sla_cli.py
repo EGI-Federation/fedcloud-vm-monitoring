@@ -5,12 +5,14 @@ import importlib
 import click
 import yaml
 from fedcloud_vm_monitoring.accounting import Accounting
+from fedcloud_vm_monitoring.appdb import AppDB
 from fedcloud_vm_monitoring.goc import GOCDB
 
 
-def check_site_slas(site, site_slas, goc, acct):
-    click.echo(f"[-] Checking accounting for site {site}")
+def check_site_slas(site, site_slas, goc, acct, appdb):
+    click.echo(f"[-] Checking site {site}")
     sla_vos = set()
+    appdb_vos = set(appdb.get_vo_for_site(site))
     if site not in site_slas:
         click.echo(f"[I] {site} is not present in any SLA")
     else:
@@ -25,6 +27,15 @@ def check_site_slas(site, site_slas, goc, acct):
                 click.echo(
                     f"[ERR] SITE {site} has no accouting info for SLA {sla_name}"
                 )
+            info_vos = sla["vos"].intersection(appdb_vos)
+            if info_vos:
+                click.echo(
+                    f"[OK] SITE {site} has configured {info_vos} for SLA {sla_name}"
+                )
+            else:
+                click.echo(
+                    f"[ERR] SITE {site} has no configured VO for SLA {sla_name}"
+                )
     click.echo("[-] Checking aditional VOs")
     # Now check which VOs are being reported without a SLA
     if not sla_vos:
@@ -32,10 +43,17 @@ def check_site_slas(site, site_slas, goc, acct):
     non_sla_vos = acct.site_vos(site) - sla_vos.union(set(["ops"]))
     if non_sla_vos:
         click.echo(
-            f"[W] Site {site} has accounting for VOs {non_sla_vos}, non covered by SLA"
+            f"[W] Site {site} has accounting for VOs {non_sla_vos} but non covered by SLA"
         )
     if "ops" not in acct.site_vos(site):
         click.echo(f"[W] SITE {site} has accounting for ops")
+    non_sla_appdb_vos = appdb_vos - sla_vos.union(set(["ops"]))
+    if non_sla_vos:
+        click.echo(
+            f"[W] Site {site} has VOs {non_sla_appdb_vos} configured but non covered by SLA"
+        )
+    if "ops" not in appdb_vos:
+        click.echo(f"[W] SITE {site} has no configuration for ops")
 
 
 @click.command()
@@ -57,11 +75,12 @@ def main(
     vo_map = yaml.load(vo_map_src, Loader=yaml.SafeLoader)
     acct = Accounting()
     goc = GOCDB()
+    appdb = AppDB()
     slas = goc.get_sites_slas(user_cert, vo_map)
-    click.echo("[-] Checking accounting over the last month...")
 
+    print(slas)
     if site:
-        check_site_slas(site, slas, goc, acct)
+        check_site_slas(site, slas, goc, acct, appdb)
     else:
         for site in acct.all_sites():
-            check_site_slas(site, slas, goc, acct)
+            check_site_slas(site, slas, goc, acct, appdb)

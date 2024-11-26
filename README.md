@@ -1,6 +1,6 @@
-# fedcloud-vm-monitoring
+# fedcloud-monitoring-tools
 
-This repository contains a Python tool to monitor usage of EGI FedCloud
+This repository contains a set of Python tools to monitor usage of EGI FedCloud
 providers and remove long-running instances. The clients work with OpenStack
 cloud providers supporting the OIDC protocol.
 
