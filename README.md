@@ -211,7 +211,23 @@ retrieved from the cloud-info-provider and reports any deviations.
 
 - An IGTF certificate to query GOCDB SLA lists
 
+### Running the monitor
+
+
+```shell
+$ fedcloud-sla-monitor --help
+Usage: fedcloud-sla-monitor [OPTIONS]
+
+Options:
+  --site TEXT         Site to check
+  --user-cert TEXT    User certificate (for GOCDB queries)  [required]
+  --vo-map-file TEXT  SLA-VO mapping file
+  --help              Show this message and exit.
+```
+
 ## Useful links
 
 - [OpenStack API](https://docs.openstack.org/api-ref/)
 - [OpenStack API examples](https://docs.openstack.org/keystone/pike/api_curl_examples.html)
+
+
