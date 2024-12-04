@@ -21,11 +21,11 @@ def check_site_slas(site, site_slas, goc, acct, appdb):
             accounted_vos = sla["vos"].intersection(acct.site_vos(site))
             if accounted_vos:
                 click.echo(
-                    f"[OK] SITE {site} has accouting info for SLA {sla_name} ({accounted_vos})"
+                    f"[OK] SITE {site} has accounting info for SLA {sla_name} ({accounted_vos})"
                 )
             else:
                 click.echo(
-                    f"[ERR] SITE {site} has no accouting info for SLA {sla_name}"
+                    f"[ERR] SITE {site} has no accounting info for SLA {sla_name}"
                 )
             info_vos = sla["vos"].intersection(appdb_vos)
             if info_vos:

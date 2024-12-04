@@ -204,7 +204,7 @@ Getting VMs information  [####################################]  100%
 ## fedcloud-sla-monitor
 
 `fedcloud-sla-monitor` checks the configuration of sites supporting SLAs. It
-compares the reported usage in the accoutnting portal and the information
+compares the reported usage in the accounting portal and the information
 retrieved from the cloud-info-provider and reports any deviations.
 
 ### Requirements
