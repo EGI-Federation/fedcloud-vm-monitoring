@@ -70,6 +70,7 @@ usage of LDAP, but should work for most cases without changes.
 
 #### Sample output
 
+<!-- markdownlint-disable MD013 -->
 ```shell
 $ fedcloud-vo-monitor --vo cloud.egi.eu
 [.] Checking VO cloud.egi.eu at NCG-INGRID-PT
@@ -200,6 +201,7 @@ Getting VMs information  [####################################]  100%
 [-] WARNING: Less than 1 GB RAM per available CPU
 [-] WARNING: Less than 3 security groups per instance
 ```
+<!-- markdownlint-enable MD013 -->
 
 ## fedcloud-sla-monitor
 
@@ -212,7 +214,6 @@ retrieved from the cloud-info-provider and reports any deviations.
 - An IGTF certificate to query GOCDB SLA lists
 
 ### Running the monitor
-
 
 ```shell
 $ fedcloud-sla-monitor --help
@@ -229,5 +230,3 @@ Options:
 
 - [OpenStack API](https://docs.openstack.org/api-ref/)
 - [OpenStack API examples](https://docs.openstack.org/keystone/pike/api_curl_examples.html)
-
-
