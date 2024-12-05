@@ -79,17 +79,22 @@ class VOTest:
         imclient = IMClient.init_client(IM_REST_API, auth)
         click.echo(f"[+] Creating test VM...")
         success, inf_id = imclient.create(tosca_template, desc_type="yaml")
-        click.echo(f"[+] IM: {success}, {inf_id}")
+        if not success:
+            raise VOTestException(inf_id)
+        click.echo(f"[+] Test VM successfully created with ID {inf_id}")
         state = "pending"
         while state != "configured":
             click.echo(f"[+] Waiting for test VM to be ready...")
             time.sleep(10)
             success, state = imclient.getvminfo(inf_id, 0, prop='state')
+        click.echo(f"[+] Waiting for test VM to be ready...")
         time.sleep(30)
 #        click.echo(f"[+] Waiting for test VM to be ready...")
 #        success, info = imclient._wait()
 #        click.echo(f"[+] IM: {success}, {inf_id}")
         # TODO: need to ssh into VM here
         success, err = imclient.destroy(inf_id)
-        click.echo(f"[+] IM: {success}, {err}")
+        if not success:
+            raise VOTestException(err)
+        click.echo(f"[+] Test VM successfully deleted with ID {inf_id}")
         self.delete_auth_file(AUTH_FILE)
