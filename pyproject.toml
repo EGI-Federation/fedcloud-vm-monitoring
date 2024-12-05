@@ -8,6 +8,7 @@ readme = "README.md"
 
 [tool.poetry.scripts]
 fedcloud-vo-monitor = "fedcloud_vm_monitoring.cli:main"
+fedcloud-vo-testing = "fedcloud_vm_monitoring.vo_mon_cli:main"
 
 [tool.poetry.dependencies]
 python = "^3.12"
