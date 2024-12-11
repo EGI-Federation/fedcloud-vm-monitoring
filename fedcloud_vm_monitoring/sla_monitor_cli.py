@@ -24,14 +24,10 @@ def check_site_slas(site, site_slas, goc, acct, appdb):
                     f"[OK] {site} has accounting info for SLA {sla_name} ({accounted_vos})"
                 )
             else:
-                click.echo(
-                    f"[ERR] {site} has no accounting info for SLA {sla_name}"
-                )
+                click.echo(f"[ERR] {site} has no accounting info for SLA {sla_name}")
             info_vos = sla["vos"].intersection(appdb_vos)
             if info_vos:
-                click.echo(
-                    f"[OK] {site} has configured {info_vos} for SLA {sla_name}"
-                )
+                click.echo(f"[OK] {site} has configured {info_vos} for SLA {sla_name}")
             else:
                 click.echo(f"[ERR] {site} has no configured VO for SLA {sla_name}")
     click.secho(f"[-] Checking aditional VOs at {site}", fg="yellow", bold=True)
