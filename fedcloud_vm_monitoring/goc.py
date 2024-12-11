@@ -49,7 +49,10 @@ class GOCDB:
                     site = svc["SITENAME"]
                     site_info = sites.get("site", dict())
                     site_info[sla_name] = {"vos": set(vos or [])}
-                    sites[site] = site_info
+                    if site in sites:
+                        sites[site].update(site_info)
+                    else:
+                        sites[site] = site_info
         return sites
 
     def get_endpoint_site(self, endpoint):

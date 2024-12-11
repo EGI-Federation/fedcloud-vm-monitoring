@@ -17,6 +17,7 @@ def check_site_slas(site, site_slas, goc, acct, appdb):
         click.echo(f"[I] {site} is not present in any SLA")
     else:
         for sla_name, sla in site_slas[site].items():
+            click.echo(f"Information for SLA {sla_name}")
             sla_vos = sla_vos.union(sla["vos"])
             accounted_vos = sla["vos"].intersection(acct.site_vos(site))
             if accounted_vos:
@@ -30,6 +31,7 @@ def check_site_slas(site, site_slas, goc, acct, appdb):
                 click.echo(f"[OK] {site} has configured {info_vos} for SLA {sla_name}")
             else:
                 click.echo(f"[ERR] {site} has no configured VO for SLA {sla_name}")
+            click.echo()
     click.secho(f"[-] Checking aditional VOs at {site}", fg="yellow", bold=True)
     # Now check which VOs are being reported without a SLA
     if not sla_vos:
@@ -40,7 +42,7 @@ def check_site_slas(site, site_slas, goc, acct, appdb):
             f"[W] {site} has accounting for VOs {non_sla_vos} but not covered by SLA"
         )
     if "ops" not in acct.site_vos(site):
-        click.echo(f"[W] {site} has accounting for ops")
+        click.echo(f"[W] {site} has no accounting for ops")
     non_sla_appdb_vos = appdb_vos - sla_vos.union(set(["ops"]))
     if non_sla_vos:
         click.echo(
