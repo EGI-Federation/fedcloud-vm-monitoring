@@ -4,7 +4,7 @@ version = "0.2.1"
 description = "Monitoring fedcloud VMs and sites"
 authors = ["Giuseppe La Rocca <giuseppe.larocca@egi.eu>",
 	   "Sebastián Luna-Valero <sebastian.luna.valero@egi.eu>",
-           "Enol Fernandez <enol.fernandez@egi.eu>"]
+           "Enol Fernández <enol.fernandez@egi.eu>"]
 readme = "README.md"
 include = [
     { path = "fedcloud_monitoring_tools/data", format = ["sdist", "wheel"] }
