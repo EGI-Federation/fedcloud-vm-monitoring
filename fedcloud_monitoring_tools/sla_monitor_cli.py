@@ -4,9 +4,9 @@ import importlib
 
 import click
 import yaml
-from fedcloud_vm_monitoring.accounting import Accounting
-from fedcloud_vm_monitoring.appdb import AppDB
-from fedcloud_vm_monitoring.goc import GOCDB
+from fedcloud_monitoring_tools.accounting import Accounting
+from fedcloud_monitoring_tools.appdb import AppDB
+from fedcloud_monitoring_tools.goc import GOCDB
 
 
 def check_site_slas(site, site_slas, goc, acct, appdb):
@@ -67,7 +67,7 @@ def main(
             vo_map_src = f.read()
     else:
         vo_map_src = importlib.resources.read_text(
-            "fedcloud_vm_monitoring.data", "vos.yaml"
+            "fedcloud_monitoring_tools.data", "vos.yaml"
         )
     vo_map = yaml.load(vo_map_src, Loader=yaml.SafeLoader)
     acct = Accounting()
