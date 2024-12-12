@@ -13,7 +13,7 @@ protocol.
 You can install with `pip` (it is recommended to install in a virtualenv!):
 
 ```shell
-pip install -U git+https://github.com/EGI-Federation/fedcloud-vm-monitoring.git
+pip install -U git+https://github.com/EGI-Federation/fedcloud-monitoring-tools.git
 ```
 
 Some sites use certificates issued by certificate authorities that are not

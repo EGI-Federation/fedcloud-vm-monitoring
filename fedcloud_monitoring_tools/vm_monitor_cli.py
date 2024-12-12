@@ -1,8 +1,8 @@
 """Monitor VM instances running in the provider"""
 
 import click
-from fedcloud_vm_monitoring.appdb import AppDB
-from fedcloud_vm_monitoring.site_monitor import SiteMonitor, SiteMonitorException
+from fedcloud_monitoring_tools.appdb import AppDB
+from fedcloud_monitoring_tools.site_monitor import SiteMonitor, SiteMonitorException
 from fedcloudclient.decorators import oidc_params
 from fedcloudclient.sites import list_sites
 
